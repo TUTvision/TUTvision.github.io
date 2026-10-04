@@ -14,242 +14,319 @@
 
   const esc = (s) =>
     String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
+  const $ = (id) => document.getElementById(id);
 
   const byTheme = {};
   PROJECTS.forEach((p) => (byTheme[p.theme] = byTheme[p.theme] || []).push(p));
   Object.values(byTheme).forEach((list) => list.sort((a, b) => b.year - a.year));
-  const ordered = Object.keys(THEMES).flatMap((t) => byTheme[t] || []);
+  const themeKeys = Object.keys(THEMES).filter((k) => byTheme[k]);
+  const ordered = themeKeys.flatMap((k) => byTheme[k]);
+  const featured = ordered.filter((p) => p.featured);
+  const byId = Object.fromEntries(PROJECTS.map((p) => [p.id, p]));
 
   /* ---------------------------------------------------------------- media */
 
-  function mediaEl(m, cls) {
-    // Width/height attributes reserve space before lazy media loads, so
-    // scrolling (and presentation mode) is not thrown off by layout shifts.
+  function mediaEl(m, cls, opts = {}) {
+    // Width/height reserve space before lazy media loads (no layout jumps).
     const dims = (typeof MEDIA_DIMS !== "undefined" && MEDIA_DIMS[m.src]) || null;
     const size = dims ? `width="${dims[0]}" height="${dims[1]}"` : "";
     if (m.type === "video") {
-      return `<video class="${cls || ""} lazy-video" muted loop playsinline preload="none" ${size}
-        ${m.poster ? `poster="${esc(m.poster)}"` : ""} data-src="${esc(m.src)}"></video>`;
+      const sound = opts.controls && m.audio;
+      return `<video class="${cls} lazy-video" ${sound ? "" : "muted"} loop playsinline preload="none" ${size}
+        ${opts.controls ? "controls" : ""} ${m.poster ? `poster="${esc(m.poster)}"` : ""} data-src="${esc(m.src)}"
+        ${sound ? 'data-manual="1"' : ""}></video>`;
     }
-    return `<img class="${cls || ""}" src="${esc(m.src)}" ${size} loading="lazy" alt="">`;
+    return `<img class="${cls}" src="${esc(m.src)}" ${size} loading="lazy" alt="">`;
   }
 
-  function authorsHtml(p) {
-    const parts = p.authors.map((a) => {
-      const name = esc(a.name) + (a.mark ? `<sup>${esc(a.mark)}</sup>` : "");
-      return `<span class="author-block">${a.url ? `<a href="${esc(a.url)}" target="_blank" rel="noopener">${name}</a>` : name}</span>`;
-    });
-    return parts.join(", ") + (p.note ? `<div class="author-note">${esc(p.note)}</div>` : "");
+  function placeholder(p) {
+    return `<div class="media-placeholder theme-${esc(p.theme)}"><i class="fas ${THEMES[p.theme].icon}"></i><span>${esc(p.short)}</span></div>`;
   }
 
-  function linksHtml(links) {
+  function authorsShort(p, n = 3) {
+    const names = p.authors.map((a) => a.name);
+    return esc(names.length > n + 1 ? names.slice(0, n).join(", ") + " et al." : names.join(", "));
+  }
+
+  function authorsFull(p) {
+    return (
+      p.authors
+        .map((a) => {
+          const name = esc(a.name) + (a.mark ? `<sup>${esc(a.mark)}</sup>` : "");
+          return `<span class="author-block">${a.url ? `<a href="${esc(a.url)}" target="_blank" rel="noopener">${name}</a>` : name}</span>`;
+        })
+        .join(", ") + (p.note ? `<div class="author-note">${esc(p.note)}</div>` : "")
+    );
+  }
+
+  function linkButtons(links, small) {
     return Object.entries(links)
       .map(([k, url]) => {
         const meta = LINK_META[k] || { label: k, icon: "fas fa-link" };
-        return `<a class="button is-rounded is-dark link-button" href="${esc(url)}" target="_blank" rel="noopener">
-          <span class="icon"><i class="${meta.icon}"></i></span><span>${meta.label}</span></a>`;
+        return small
+          ? `<a class="icon-link" href="${esc(url)}" target="_blank" rel="noopener" title="${meta.label}" aria-label="${meta.label}"><i class="${meta.icon}"></i></a>`
+          : `<a class="button is-rounded is-dark link-button" href="${esc(url)}" target="_blank" rel="noopener"><span class="icon"><i class="${meta.icon}"></i></span><span>${meta.label}</span></a>`;
       })
       .join("");
   }
 
-  function youtubeHtml(list) {
-    if (!list || !list.length) return "";
-    return `<div class="columns is-multiline is-centered youtube-row">${list
-      .map(
-        (y) => `<div class="column ${list.length > 1 ? "is-half" : "is-four-fifths"}">
-          <button class="yt-facade" data-yt="${esc(y.id)}" aria-label="Play video: ${esc(y.title)}">
-            <img src="https://i.ytimg.com/vi/${esc(y.id)}/hqdefault.jpg" loading="lazy" alt="">
-            <span class="yt-play"><i class="fab fa-youtube"></i></span>
-            <span class="yt-title">${esc(y.title)}</span>
-          </button></div>`
-      )
-      .join("")}</div>`;
-  }
+  const tagsHtml = (p) =>
+    `<span class="tag venue-tag">${esc(p.venue)}</span><span class="tag theme-tag theme-${esc(p.theme)}"><i class="fas ${THEMES[p.theme].icon}"></i>&nbsp;${esc(THEMES[p.theme].label)}</span>`;
 
-  function galleryHtml(list) {
-    if (!list || !list.length) return "";
-    const portrait = list.every((g) => g.portrait);
-    const col = portrait ? "is-4" : list.length === 1 ? "is-four-fifths" : "is-half-tablet";
-    return `<div class="columns is-multiline is-centered gallery${portrait ? " is-mobile" : ""}">${list
-      .map(
-        (g) => `<div class="column ${col}"><figure class="gallery-item${g.portrait ? " is-portrait" : ""}">
-          ${mediaEl(g, "gallery-media")}
-          ${g.caption ? `<figcaption>${esc(g.caption)}</figcaption>` : ""}</figure></div>`
-      )
-      .join("")}</div>`;
-  }
+  /* -------------------------------------------------------- page sections */
 
-  function projectHtml(p, idx) {
-    const sup = SUPERVISORS[p.supervisor];
-    const theme = THEMES[p.theme];
-    // Portrait main clips sit next to the first gallery clips as a row.
-    const portraitRow = p.media.portrait && p.gallery && p.gallery.every((g) => g.portrait);
-    const heroMedia = portraitRow
-      ? galleryHtml([{ ...p.media, caption: p.gallery[0].caption }, ...p.gallery])
-      : `<div class="hero-media${p.media.portrait ? " is-portrait" : ""}">${mediaEl(p.media, "main-media")}</div>`;
-    return `
-    <section class="section project" id="${esc(p.id)}" data-theme="${esc(p.theme)}" data-index="${idx}">
-      <div class="container is-max-desktop">
-        <div class="has-text-centered">
-          <div class="project-tags">
-            <span class="tag is-medium venue-tag">${esc(p.venue)}</span>
-            <span class="tag is-medium theme-tag theme-${esc(p.theme)}"><i class="fas ${theme.icon}"></i>&nbsp;${esc(theme.label)}</span>
-          </div>
-          <h2 class="title is-2 publication-title">${esc(p.title)}</h2>
-          <div class="is-size-5 publication-authors">${authorsHtml(p)}</div>
-          <div class="supervisor">Supervised by <a href="${esc(sup.url)}" target="_blank" rel="noopener">Prof. ${esc(sup.name)}</a></div>
-          <div class="publication-links">${linksHtml(p.links)}</div>
-        </div>
-        ${heroMedia}
-        <div class="tldr"><span class="tldr-label">In short</span>${esc(p.tldr)}</div>
-        <div class="columns is-centered">
-          <div class="column is-four-fifths">
-            <h3 class="title is-4 has-text-centered">${esc(p.abstractLabel || "Abstract")}</h3>
-            <div class="content has-text-justified abstract">
-              ${p.abstract.map((t) => `<p>${esc(t)}</p>`).join("")}
-              ${p.highlights ? `<ul>${p.highlights.map((h) => `<li>${esc(h)}</li>`).join("")}</ul>` : ""}
-            </div>
-          </div>
-        </div>
-        ${portraitRow ? "" : galleryHtml(p.gallery)}
-        ${youtubeHtml(p.youtube)}
-      </div>
-    </section>`;
-  }
-
-  function themeHeaderHtml(key) {
-    const t = THEMES[key];
-    return `<section class="section theme-header theme-${esc(key)}" id="theme-${esc(key)}" data-theme="${esc(key)}">
-      <div class="container is-max-desktop has-text-centered">
-        <p class="theme-kicker"><i class="fas ${t.icon}"></i></p>
-        <h2 class="title is-2">${esc(t.label)}</h2>
-        <p class="subtitle is-5">${esc(t.blurb)}</p>
-      </div></section>`;
-  }
-
-  /* --------------------------------------------------------------- render */
-
-  document.getElementById("project-count").textContent = PROJECTS.length;
-
-  document.getElementById("wall").innerHTML = ordered
+  $("wall").innerHTML = featured
     .map(
-      (p) => `<a class="wall-tile theme-${esc(p.theme)}" href="#${esc(p.id)}" data-theme="${esc(p.theme)}">
+      (p) => `<a class="wall-tile theme-${esc(p.theme)}" href="#${esc(p.id)}" data-open="${esc(p.id)}">
         ${mediaEl(p.media, "wall-media")}
         <span class="wall-caption"><strong>${esc(p.short)}</strong><small>${esc(p.venue)}</small></span></a>`
     )
     .join("");
 
-  document.getElementById("theme-filter").innerHTML =
+  $("theme-filter").innerHTML =
     `<button class="button is-rounded filter-btn is-active" data-filter="all">All</button>` +
-    Object.entries(THEMES)
-      .filter(([k]) => byTheme[k])
+    themeKeys
       .map(
-        ([k, t]) =>
-          `<button class="button is-rounded filter-btn" data-filter="${esc(k)}"><span class="icon"><i class="fas ${t.icon}"></i></span><span>${esc(t.label)}</span></button>`
+        (k) =>
+          `<button class="button is-rounded filter-btn" data-filter="${esc(k)}"><span class="icon"><i class="fas ${THEMES[k].icon}"></i></span><span>${esc(THEMES[k].label)}</span></button>`
       )
       .join("");
 
-  let idx = 0;
-  document.getElementById("projects").innerHTML = Object.keys(THEMES)
-    .filter((k) => byTheme[k])
-    .map((k) => themeHeaderHtml(k) + byTheme[k].map((p) => projectHtml(p, idx++)).join(""))
+  $("nav-themes").innerHTML += themeKeys
+    .map((k) => `<a class="navbar-item" href="#theme-${esc(k)}">${esc(THEMES[k].nav)}</a>`)
     .join("");
 
-  document.getElementById("people").innerHTML = MEMBERS.map(
-    (m) => `<div class="column is-3-desktop is-4-tablet is-6-mobile">
-      <a class="person${m.pi ? " is-pi" : ""}" href="${esc(m.url)}" target="_blank" rel="noopener">
-        ${
-          m.img
-            ? `<img src="${esc(m.img)}" alt="${esc(m.name)}" loading="lazy">`
-            : `<span class="initials">${esc(m.name.split(/[\s-]+/).map((w) => w[0]).filter((c) => c === c.toUpperCase()).slice(0, 2).join(""))}</span>`
-        }
-        <strong>${m.pi ? "Prof. " : ""}${esc(m.name)}</strong>
-        <small>${esc(m.topic)}</small></a></div>`
-  ).join("");
+  function cardHtml(p) {
+    const media = p.media ? mediaEl(p.media, "card-media" + (p.media.type === "image" ? " is-still" : "")) : placeholder(p);
+    return `<div class="column is-4-desktop is-6-tablet">
+      <article class="card-project theme-${esc(p.theme)}" id="card-${esc(p.id)}">
+        <a class="card-media-wrap" href="#${esc(p.id)}" data-open="${esc(p.id)}" aria-label="Details: ${esc(p.short)}">${media}
+          ${p.media && p.media.type === "video" ? '<span class="video-badge"><i class="fas fa-play"></i></span>' : ""}</a>
+        <div class="card-body">
+          <div class="card-tags"><span class="tag venue-tag">${esc(p.venue)}</span></div>
+          <h3 class="card-title"><a href="#${esc(p.id)}" data-open="${esc(p.id)}">${esc(p.title)}</a></h3>
+          <p class="card-authors">${authorsShort(p)}</p>
+          <p class="card-tldr">${esc(p.tldr)}</p>
+          <div class="card-foot">
+            <a class="button is-small is-rounded details-btn" href="#${esc(p.id)}" data-open="${esc(p.id)}">
+              <span>Details</span><span class="icon"><i class="fas fa-angle-right"></i></span></a>
+            <span class="card-links">${linkButtons(p.links, true)}</span>
+          </div>
+        </div>
+      </article></div>`;
+  }
+
+  $("projects").innerHTML = themeKeys
+    .map(
+      (k) => `<section class="theme-block" id="theme-${esc(k)}" data-theme="${esc(k)}">
+        <header class="theme-head theme-${esc(k)}">
+          <h3 class="title is-4"><i class="fas ${THEMES[k].icon}"></i> ${esc(THEMES[k].label)}</h3>
+          <p>${esc(THEMES[k].blurb)}</p>
+        </header>
+        <div class="columns is-multiline">${byTheme[k].map(cardHtml).join("")}</div>
+      </section>`
+    )
+    .join("");
 
   /* ------------------------------------------------- lazy video playback */
 
-  const videos = document.querySelectorAll("video.lazy-video");
   const io = new IntersectionObserver(
     (entries) => {
       entries.forEach((e) => {
         const v = e.target;
         if (e.isIntersecting) {
           if (!v.src) v.src = v.dataset.src;
-          const p = v.play();
-          if (p && p.catch) p.catch(() => {});
+          if (!v.dataset.manual) {
+            const pr = v.play();
+            if (pr && pr.catch) pr.catch(() => {});
+          }
         } else if (!v.paused) {
           v.pause();
         }
       });
     },
-    { rootMargin: "200px 0px", threshold: 0.15 }
+    { rootMargin: "150px 0px", threshold: 0.1 }
   );
-  videos.forEach((v) => io.observe(v));
+  const observeVideos = (root) => root.querySelectorAll("video.lazy-video").forEach((v) => io.observe(v));
+  observeVideos(document);
 
-  /* --------------------------------------------------------- YouTube facade */
+  /* ------------------------------------------------------- details modal */
+
+  const modal = $("details");
+  let openId = null;
+
+  function detailsHtml(p) {
+    const sup = SUPERVISORS[p.supervisor];
+    const main = p.media
+      ? `<div class="details-media${p.media.portrait ? " is-portrait" : ""}">${mediaEl(p.media, "details-main")}</div>`
+      : "";
+    const gallery = (p.gallery || []).length
+      ? `<div class="columns is-multiline is-centered gallery${p.gallery.every((g) => g.portrait) ? " is-mobile" : ""}">${p.gallery
+          .map(
+            (g) => `<div class="column ${g.portrait ? "is-4" : p.gallery.length === 1 ? "is-10" : "is-6-tablet"}">
+              <figure class="gallery-item${g.portrait ? " is-portrait" : ""}">${mediaEl(g, "gallery-media", { controls: g.audio })}
+              ${g.caption ? `<figcaption>${esc(g.caption)}</figcaption>` : ""}</figure></div>`
+          )
+          .join("")}</div>`
+      : "";
+    const yt = (p.youtube || []).length
+      ? `<div class="columns is-multiline is-centered">${p.youtube
+          .map(
+            (y) => `<div class="column ${p.youtube.length > 1 ? "is-6-tablet" : "is-10"}">
+              <button class="yt-facade" data-yt="${esc(y.id)}" aria-label="Play video: ${esc(y.title)}">
+                <img src="https://i.ytimg.com/vi/${esc(y.id)}/hqdefault.jpg" loading="lazy" alt="">
+                <span class="yt-play"><i class="fab fa-youtube"></i></span>
+                <span class="yt-title">${esc(y.title)}</span></button></div>`
+          )
+          .join("")}</div>`
+      : "";
+    return `
+      <div class="has-text-centered">
+        <div class="project-tags">${tagsHtml(p)}</div>
+        <h2 class="title is-3 publication-title" id="details-title">${esc(p.title)}</h2>
+        <div class="publication-authors">${authorsFull(p)}</div>
+        <div class="supervisor">Supervised by <a href="${esc(sup.url)}" target="_blank" rel="noopener">Prof. ${esc(sup.name)}</a></div>
+        <div class="publication-links">${linkButtons(p.links)}</div>
+      </div>
+      ${main}
+      <div class="tldr"><span class="tldr-label">In short</span>${esc(p.tldr)}</div>
+      <details class="abstract-box" open>
+        <summary>${esc(p.abstractLabel || "Abstract")}</summary>
+        <div class="content has-text-justified abstract">
+          ${p.abstract.map((t) => `<p>${esc(t)}</p>`).join("")}
+          ${p.highlights ? `<ul>${p.highlights.map((h) => `<li>${esc(h)}</li>`).join("")}</ul>` : ""}
+        </div>
+      </details>
+      ${gallery || yt ? `<h3 class="title is-5 media-heading">Media</h3>${gallery}${yt}` : ""}`;
+  }
+
+  function openDetails(id, push = true) {
+    const p = byId[id];
+    if (!p) return;
+    openId = id;
+    const body = $("details-body");
+    body.querySelectorAll("video").forEach((v) => io.unobserve(v));
+    body.innerHTML = detailsHtml(p);
+    body.scrollTop = 0;
+    const i = ordered.indexOf(p);
+    $("details-count").textContent = `${i + 1} / ${ordered.length}`;
+    modal.classList.add("is-active");
+    modal.setAttribute("aria-hidden", "false");
+    document.documentElement.classList.add("is-clipped");
+    observeVideos(body);
+    if (push && location.hash !== "#" + id) history.pushState(null, "", "#" + id);
+  }
+
+  function closeDetails(push = true) {
+    if (!openId) return;
+    const id = openId;
+    openId = null;
+    const body = $("details-body");
+    body.querySelectorAll("video").forEach((v) => (io.unobserve(v), v.pause()));
+    body.innerHTML = "";
+    modal.classList.remove("is-active");
+    modal.setAttribute("aria-hidden", "true");
+    document.documentElement.classList.remove("is-clipped");
+    if (push) history.pushState(null, "", location.pathname + location.search);
+    const card = $("card-" + id);
+    if (card) card.scrollIntoView({ block: "nearest" });
+  }
+
+  const step = (d) => {
+    const i = ordered.indexOf(byId[openId]);
+    openDetails(ordered[(i + d + ordered.length) % ordered.length].id);
+  };
 
   document.addEventListener("click", (ev) => {
-    const btn = ev.target.closest(".yt-facade");
-    if (!btn) return;
-    const wrap = document.createElement("div");
-    wrap.className = "yt-frame";
-    wrap.innerHTML = `<iframe src="https://www.youtube-nocookie.com/embed/${encodeURIComponent(
-      btn.dataset.yt
-    )}?autoplay=1&rel=0" title="YouTube video" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture; fullscreen" allowfullscreen></iframe>`;
-    btn.replaceWith(wrap);
-    stopPresentation();
+    const opener = ev.target.closest("[data-open]");
+    if (opener) {
+      ev.preventDefault();
+      openDetails(opener.dataset.open);
+      return;
+    }
+    if (ev.target.closest("[data-close]")) closeDetails();
+    const yt = ev.target.closest(".yt-facade");
+    if (yt) {
+      const wrap = document.createElement("div");
+      wrap.className = "yt-frame";
+      wrap.innerHTML = `<iframe src="https://www.youtube-nocookie.com/embed/${encodeURIComponent(yt.dataset.yt)}?autoplay=1&rel=0" title="YouTube video" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture; fullscreen" allowfullscreen></iframe>`;
+      yt.replaceWith(wrap);
+    }
   });
+  $("details-prev").addEventListener("click", () => step(-1));
+  $("details-next").addEventListener("click", () => step(1));
+
+  function syncHash() {
+    const id = decodeURIComponent(location.hash.slice(1));
+    if (byId[id]) openDetails(id, false);
+    else closeDetails(false);
+  }
+  window.addEventListener("popstate", syncHash);
 
   /* ----------------------------------------------------------- theme filter */
 
   const filterBtns = document.querySelectorAll(".filter-btn");
-  function applyFilter(f) {
-    filterBtns.forEach((b) => b.classList.toggle("is-active", b.dataset.filter === f));
-    document.querySelectorAll("#projects [data-theme], #wall [data-theme]").forEach((el) => {
-      el.classList.toggle("is-hidden", f !== "all" && el.dataset.theme !== f);
-    });
-  }
   filterBtns.forEach((b) =>
     b.addEventListener("click", () => {
-      applyFilter(b.dataset.filter);
-      const target = b.dataset.filter === "all" ? "overview" : "theme-" + b.dataset.filter;
-      document.getElementById(target).scrollIntoView({ behavior: "smooth" });
+      const f = b.dataset.filter;
+      filterBtns.forEach((x) => x.classList.toggle("is-active", x === b));
+      document.querySelectorAll(".theme-block").forEach((el) => el.classList.toggle("is-hidden", f !== "all" && el.dataset.theme !== f));
     })
   );
-
-  /* ------------------------------------------------------ navbar burger */
 
   document.querySelectorAll(".navbar-burger").forEach((el) =>
     el.addEventListener("click", () => {
       el.classList.toggle("is-active");
-      document.getElementById(el.dataset.target).classList.toggle("is-active");
+      $(el.dataset.target).classList.toggle("is-active");
     })
   );
+  $("main-nav").addEventListener("click", (e) => {
+    if (e.target.closest("a")) {
+      $("main-nav").classList.remove("is-active");
+      document.querySelector(".navbar-burger").classList.remove("is-active");
+    }
+  });
 
   /* ------------------------------------------------- presentation mode */
-  // Auto-advances through the projects for unattended display at events.
+  // Full-screen slideshow of the highlighted projects for unattended display.
   // Open with the button, or with ?present (optionally ?present=30 seconds).
 
   const params = new URLSearchParams(location.search);
-  const dwell = Math.max(8, parseInt(params.get("present"), 10) || 25) * 1000;
-  const overlay = document.getElementById("present-overlay");
-  const label = document.getElementById("present-label");
-  const bar = document.getElementById("present-progress");
+  const dwell = Math.max(8, parseInt(params.get("present"), 10) || 20) * 1000;
+  const show = $("show");
+  const bar = $("show-progress");
   let timer = null;
-  let current = -1;
+  let current = 0;
   let paused = false;
+  let hideCursor = null;
 
-  const visibleProjects = () => [...document.querySelectorAll("section.project:not(.is-hidden)")];
+  function qrSvg(url) {
+    if (typeof qrcode === "undefined") return "";
+    const qr = qrcode(0, "M");
+    qr.addData(url);
+    qr.make();
+    return qr.createSvgTag({ cellSize: 4, margin: 0, scalable: true });
+  }
 
-  function show(i) {
-    const list = visibleProjects();
-    if (!list.length) return;
-    current = (i + list.length) % list.length;
-    const sec = list[current];
-    sec.scrollIntoView({ behavior: "smooth", block: "start" });
-    const p = PROJECTS.find((x) => x.id === sec.id);
-    label.textContent = `${current + 1} / ${list.length} · ${p ? p.short : ""}`;
+  function showSlide(i) {
+    current = (i + featured.length) % featured.length;
+    const p = featured[current];
+    const holder = $("show-media");
+    holder.innerHTML =
+      p.media.type === "video"
+        ? `<video muted loop playsinline autoplay src="${esc(p.media.src)}" poster="${esc(p.media.poster || "")}"></video>`
+        : `<img src="${esc(p.media.src)}" alt="">`;
+    const v = holder.querySelector("video");
+    if (v) {
+      const pr = v.play();
+      if (pr && pr.catch) pr.catch(() => {});
+    }
+    $("show-tags").innerHTML = tagsHtml(p);
+    $("show-title").textContent = p.title;
+    $("show-authors").textContent = p.authors.map((a) => a.name).join(", ");
+    $("show-tldr").textContent = p.tldr;
+    $("show-qr").innerHTML = qrSvg(p.links.page || p.links.arxiv || p.links.paper || LAB.website);
+    $("show-label").textContent = `${current + 1} / ${featured.length}`;
     restartTimer();
   }
 
@@ -258,58 +335,73 @@
     bar.style.transition = "none";
     bar.style.width = "0%";
     if (paused) return;
-    void bar.offsetWidth; // restart the CSS transition
+    void bar.offsetWidth;
     bar.style.transition = `width ${dwell}ms linear`;
     bar.style.width = "100%";
-    timer = setTimeout(() => show(current + 1), dwell);
+    timer = setTimeout(() => showSlide(current + 1), dwell);
   }
 
-  function startPresentation() {
-    document.body.classList.add("presenting");
-    overlay.hidden = false;
+  function startShow() {
+    closeDetails();
+    document.querySelectorAll("video.lazy-video").forEach((v) => v.pause());
+    show.hidden = false;
+    document.documentElement.classList.add("is-clipped", "presenting");
     paused = false;
-    document.getElementById("present-pause").innerHTML = '<i class="fas fa-pause"></i>';
+    $("show-pause").innerHTML = '<i class="fas fa-pause"></i>';
     if (document.documentElement.requestFullscreen && !document.fullscreenElement) {
       document.documentElement.requestFullscreen().catch(() => {});
     }
-    show(0);
+    showSlide(0);
   }
 
-  function stopPresentation() {
-    if (!document.body.classList.contains("presenting")) return;
+  function stopShow() {
+    if (show.hidden) return;
     clearTimeout(timer);
-    document.body.classList.remove("presenting");
-    overlay.hidden = true;
+    show.hidden = true;
+    $("show-media").innerHTML = "";
+    document.documentElement.classList.remove("is-clipped", "presenting");
     if (document.fullscreenElement && document.exitFullscreen) document.exitFullscreen().catch(() => {});
   }
 
   function togglePause() {
     paused = !paused;
-    document.getElementById("present-pause").innerHTML = paused
-      ? '<i class="fas fa-play"></i>'
-      : '<i class="fas fa-pause"></i>';
+    $("show-pause").innerHTML = paused ? '<i class="fas fa-play"></i>' : '<i class="fas fa-pause"></i>';
     restartTimer();
   }
 
   document.querySelectorAll("[data-present]").forEach((b) =>
     b.addEventListener("click", (e) => {
       e.preventDefault();
-      startPresentation();
+      startShow();
     })
   );
-  document.getElementById("present-prev").addEventListener("click", () => show(current - 1));
-  document.getElementById("present-next").addEventListener("click", () => show(current + 1));
-  document.getElementById("present-pause").addEventListener("click", togglePause);
-  document.getElementById("present-exit").addEventListener("click", stopPresentation);
-  document.addEventListener("keydown", (e) => {
-    if (!document.body.classList.contains("presenting")) return;
-    if (e.key === "ArrowRight" || e.key === "PageDown") show(current + 1);
-    else if (e.key === "ArrowLeft" || e.key === "PageUp") show(current - 1);
-    else if (e.key === " ") {
-      e.preventDefault();
-      togglePause();
-    } else if (e.key === "Escape") stopPresentation();
+  $("show-prev").addEventListener("click", () => showSlide(current - 1));
+  $("show-next").addEventListener("click", () => showSlide(current + 1));
+  $("show-pause").addEventListener("click", togglePause);
+  $("show-exit").addEventListener("click", stopShow);
+  show.addEventListener("mousemove", () => {
+    show.classList.remove("hide-cursor");
+    clearTimeout(hideCursor);
+    hideCursor = setTimeout(() => show.classList.add("hide-cursor"), 2500);
   });
 
-  if (params.has("present")) startPresentation();
+  document.addEventListener("keydown", (e) => {
+    if (!show.hidden) {
+      if (e.key === "ArrowRight" || e.key === "PageDown") showSlide(current + 1);
+      else if (e.key === "ArrowLeft" || e.key === "PageUp") showSlide(current - 1);
+      else if (e.key === " ") {
+        e.preventDefault();
+        togglePause();
+      } else if (e.key === "Escape") stopShow();
+      return;
+    }
+    if (openId) {
+      if (e.key === "Escape") closeDetails();
+      else if (e.key === "ArrowRight") step(1);
+      else if (e.key === "ArrowLeft") step(-1);
+    }
+  });
+
+  if (params.has("present")) startShow();
+  else syncHash();
 })();

@@ -1,27 +1,37 @@
 /*
- * Project data for the TUT Vision showcase page.
+ * Project data for the TUNI Vision showcase page.
  *
  * To add a project, append an object to PROJECTS. Media files live in
- * static/media/ (keep looping clips short, H.264 MP4, <= 1280 px wide).
+ * static/media/ (short H.264 MP4 loops, <= 1280 px wide, plus a poster .jpg).
+ * Add new media sizes to static/js/media-dims.js.
  *
  * Fields
- *   id          anchor id (unique, url-safe)
+ *   id          url-safe id; the details view opens at index.html#<id>
  *   theme       key of THEMES below
  *   year        number, used for sorting inside a theme
- *   venue       short venue / status label shown as a tag
- *   title       full title
- *   short       acronym or short name shown on the overview wall
- *   authors     [{ name, url?, mark? }]  mark: "*" equal contribution etc.
+ *   venue       short venue / status label
+ *   title, short
+ *   authors     [{ name, url?, mark? }]
+ *   note        optional footnote under the authors
  *   supervisor  "kamarainen" | "rahtu"
- *   links       { paper, arxiv, page, code, video, data, models }
- *   media       { type: "video" | "image", src, poster? }   main looping clip
- *   tldr        one-line takeaway
+ *   links       { paper, arxiv, page, code, video, data, models, challenge }
+ *   media       { type: "video" | "image", src, poster?, portrait? } shown on the card
+ *               (omit for a text-only card)
+ *   featured    true = included in the "Highlights" strip and presentation mode
+ *   tldr        one-line takeaway (shown on the card)
  *   abstractLabel  heading for the text block ("Abstract" by default)
  *   abstract    [paragraph, ...]
  *   highlights  optional [string, ...]
- *   gallery     optional [{ type, src, poster?, caption, portrait? }]
+ *   gallery     optional [{ type, src, poster?, caption, portrait?, audio? }]
  *   youtube     optional [{ id, title }]
  */
+
+const LAB = {
+  name: "TUNI Vision",
+  fullName: "Computer Vision Group, Tampere University",
+  website: "https://research.tuni.fi/vision/",
+  github: "https://github.com/TUTvision",
+};
 
 const PEOPLE = {
   kamarainen: {
@@ -30,14 +40,21 @@ const PEOPLE = {
   },
   rahtu: { name: "Esa Rahtu", url: "https://esa.rahtu.fi/" },
   suomela: { name: "Lauri Suomela", url: "https://lasuomela.github.io/" },
-  kuruppu: {
-    name: "Sasanka Kuruppu Arachchige",
-    url: "https://sasakuruppuarachchi.github.io/",
-  },
+  kuruppu: { name: "Sasanka Kuruppu Arachchige", url: "https://sasakuruppuarachchi.github.io/" },
   torres: { name: "German F. Torres", url: "https://germanftv.github.io/" },
   cai: { name: "Dingding Cai", url: "https://dingdingcai.github.io/" },
   ren: { name: "Xuqian Ren", url: "https://xuqianren.github.io/" },
   yang: { name: "Wenyan Yang", url: "https://uenian33.github.io/" },
+  zhu: { name: "Lingyu Zhu", url: "https://ly-zhu.github.io/" },
+  tripathy: { name: "Soumya Tripathy", url: "https://blade6570.github.io/soumyatripathy/" },
+  viertola: { name: "Ilpo Viertola", url: "https://ilpoviertola.github.io/" },
+  iashin: { name: "Vladimir Iashin", url: "https://v-iashin.github.io/" },
+  turkulainen: { name: "Matias Turkulainen", url: "https://maturk.github.io" },
+  kannala: { name: "Juho Kannala", url: "https://users.aalto.fi/~kannalj1/" },
+  heikkila: { name: "Janne Heikkilä", url: "https://www.oulu.fi/en/researchers/janne-heikkila" },
+  melekhov: { name: "Iaroslav Melekhov", url: "https://imelekhov.com" },
+  seiskari: { name: "Otto Seiskari", url: "https://oseiskar.github.io" },
+  pajarinen: { name: "Joni Pajarinen" },
 };
 
 const P = (key, mark) => ({ ...PEOPLE[key], mark });
@@ -45,37 +62,47 @@ const A = (name, url, mark) => ({ name, url, mark });
 
 const THEMES = {
   navigation: {
-    label: "Robot Navigation",
+    label: "Robot Navigation & Autonomy",
+    nav: "Navigation",
     icon: "fa-route",
-    blurb:
-      "Learning visual navigation policies that work in the real world: from crowd-sourced data at planetary scale to sim-to-real transfer and place recognition.",
-  },
-  aerial: {
-    label: "Aerial Robotics",
-    icon: "fa-helicopter",
-    blurb:
-      "Open, agile aerial platforms and physics-aware state estimation for drones that fly where GPS and cameras fail.",
+    blurb: "Visual navigation policies that work in the real world, from crowd-sourced data to sim-to-real transfer.",
   },
   "3d": {
-    label: "3D Reconstruction & Pose",
+    label: "3D Reconstruction, Mapping & Pose",
+    nav: "3D Vision",
     icon: "fa-cube",
-    blurb:
-      "Gaussian splatting, meshing and 6D object pose estimation from everyday devices such as smartphones.",
+    blurb: "Gaussian splatting, meshing, datasets and 6D object pose from everyday cameras.",
+  },
+  aerial: {
+    label: "Aerial & Field Robotics",
+    nav: "Aerial",
+    icon: "fa-helicopter",
+    blurb: "Open drone platforms, robust state estimation and air-ground robot teams in the field.",
+  },
+  learning: {
+    label: "Robot Learning & Control",
+    nav: "Robot Learning",
+    icon: "fa-robot",
+    blurb: "Imitation and reinforcement learning for heavy machines and robot manipulators.",
   },
   imaging: {
-    label: "Video Restoration",
+    label: "Image & Video Restoration and Synthesis",
+    nav: "Imaging",
     icon: "fa-film",
-    blurb: "Using depth and multi-modal cues to recover sharp video from motion blur.",
+    blurb: "Depth-aware deblurring and controllable face animation.",
+  },
+  audio: {
+    label: "Audio-Visual Learning",
+    nav: "Audio-Visual",
+    icon: "fa-wave-square",
+    blurb: "Generating, separating and synchronising sound with what is seen.",
   },
 };
 
-const SUPERVISORS = {
-  kamarainen: PEOPLE.kamarainen,
-  rahtu: PEOPLE.rahtu,
-};
+const SUPERVISORS = { kamarainen: PEOPLE.kamarainen, rahtu: PEOPLE.rahtu };
 
 const PROJECTS = [
-  /* ------------------------------------------------------------ navigation */
+  /* ============================================================ navigation */
   {
     id: "navigation-scaling",
     theme: "navigation",
@@ -83,14 +110,9 @@ const PROJECTS = [
     venue: "IEEE RA-L 2026",
     title: "Data Scaling for Navigation in Unknown Environments",
     short: "Navigation Scaling",
-    authors: [
-      P("suomela"),
-      A("Naoki Takahata"),
-      P("kuruppu"),
-      A("Harry Edelman"),
-      P("kamarainen"),
-    ],
+    authors: [P("suomela"), A("Naoki Takahata"), P("kuruppu"), A("Harry Edelman"), P("kamarainen")],
     supervisor: "kamarainen",
+    featured: true,
     links: {
       paper: "https://doi.org/10.1109/LRA.2026.3677718",
       arxiv: "https://arxiv.org/abs/2601.09444",
@@ -98,42 +120,17 @@ const PROJECTS = [
       code: "https://github.com/lasuomela/NavigationScaling",
       models: "https://huggingface.co/collections/lauriasuo/frodobots",
     },
-    media: {
-      type: "video",
-      src: "static/media/navscaling_wuhan.mp4",
-      poster: "static/media/navscaling_wuhan.jpg",
-    },
-    tldr:
-      "4,565 hours of crowd-sourced driving from 161 locations in 35 countries; 125 km of zero-shot autonomous sidewalk driving in four countries. Data diversity beats data quantity.",
+    media: { type: "video", src: "static/media/navscaling_wuhan.mp4", poster: "static/media/navscaling_wuhan.jpg" },
+    tldr: "4,565 hours of crowd-sourced data from 35 countries; 125 km of zero-shot sidewalk driving in four countries. Data diversity beats data quantity.",
     abstract: [
       "Generalization of imitation-learned navigation policies to environments unseen in training remains a major challenge. We address this by conducting the first large-scale study of how data quantity and data diversity affect real-world generalization in end-to-end, map-free visual navigation. Using a curated 4,565-hour crowd-sourced dataset collected across 161 locations in 35 countries, we train policies for point goal navigation and evaluate their closed-loop control performance on sidewalk robots operating in four countries, covering 125 km of autonomous driving.",
       "Our results show that large-scale training data enables zero-shot navigation in unknown environments, approaching the performance of policies trained with environment-specific demonstrations. Critically, we find that data diversity is far more important than data quantity. Doubling the number of geographical locations in a training set decreases navigation errors by ~15%, while performance benefit from adding data from existing locations saturates with very little data. We also observe that, with noisy crowd-sourced data, simple regression-based models outperform generative and sequence-based architectures.",
     ],
     gallery: [
-      {
-        type: "video",
-        src: "static/media/navscaling_mosaic.mp4",
-        poster: "static/media/navscaling_mosaic.jpg",
-        caption: "Training data: examples from a subset of the 161 training locations.",
-      },
-      {
-        type: "video",
-        src: "static/media/navscaling_kisumu.mp4",
-        poster: "static/media/navscaling_kisumu.jpg",
-        caption: "Zero-shot deployment in Kisumu, Kenya.",
-      },
-      {
-        type: "video",
-        src: "static/media/navscaling_portlouis.mp4",
-        poster: "static/media/navscaling_portlouis.jpg",
-        caption: "Zero-shot deployment in Port Louis, Mauritius.",
-      },
-      {
-        type: "video",
-        src: "static/media/navscaling_selebi.mp4",
-        poster: "static/media/navscaling_selebi.jpg",
-        caption: "Zero-shot deployment in Selebi-Phikwe, Botswana.",
-      },
+      { type: "video", src: "static/media/navscaling_mosaic.mp4", poster: "static/media/navscaling_mosaic.jpg", caption: "Training data from a subset of the 161 locations." },
+      { type: "video", src: "static/media/navscaling_kisumu.mp4", poster: "static/media/navscaling_kisumu.jpg", caption: "Zero-shot deployment in Kisumu, Kenya." },
+      { type: "video", src: "static/media/navscaling_portlouis.mp4", poster: "static/media/navscaling_portlouis.jpg", caption: "Zero-shot deployment in Port Louis, Mauritius." },
+      { type: "video", src: "static/media/navscaling_selebi.mp4", poster: "static/media/navscaling_selebi.jpg", caption: "Zero-shot deployment in Selebi-Phikwe, Botswana." },
     ],
     youtube: [
       { id: "6SUp4tYGesY", title: "Full run: Wuhan, China" },
@@ -147,40 +144,50 @@ const PROJECTS = [
     venue: "ICRA 2026",
     title: "Synthetic vs. Real Training Data for Visual Navigation",
     short: "FAINT",
-    authors: [
-      P("suomela"),
-      P("kuruppu"),
-      P("torres"),
-      A("Harry Edelman"),
-      P("kamarainen"),
-    ],
+    authors: [P("suomela"), P("kuruppu"), P("torres"), A("Harry Edelman"), P("kamarainen")],
     supervisor: "kamarainen",
+    featured: true,
     links: {
       arxiv: "https://arxiv.org/abs/2509.11791",
       page: "https://lasuomela.github.io/faint/",
       code: "https://github.com/lasuomela/faint",
       models: "https://huggingface.co/collections/lauriasuo/faint-67b71dbaf71f1b648986f382",
     },
-    media: {
-      type: "video",
-      src: "static/media/faint.mp4",
-      poster: "static/media/faint.jpg",
-    },
-    tldr:
-      "A navigation policy trained only in simulation beats its real-data-trained twin by 31% and prior state of the art by 50%, and transfers to a drone without retraining.",
+    media: { type: "video", src: "static/media/faint.mp4", poster: "static/media/faint.jpg" },
+    tldr: "A navigation policy trained only in simulation beats its real-data twin by 31% and the prior state of the art by 50%, and runs on a drone without retraining.",
     abstract: [
       "This paper investigates how the performance of visual navigation policies trained in simulation compares to policies trained with real-world data. Performance degradation of simulator-trained policies is often significant when they are evaluated in the real world. However, despite this well-known sim-to-real gap, we demonstrate that simulator-trained policies can match the performance of their real-world-trained counterparts.",
       "Central to our approach is a navigation policy architecture that bridges the sim-to-real appearance gap by leveraging pretrained visual representations and runs real-time on robot hardware. Evaluations on a wheeled mobile robot show that the proposed policy, when trained in simulation, outperforms its real-world-trained version by 31% and the prior state-of-the-art methods by 50% in navigation success rate. Policy generalization is verified by deploying the same model onboard a drone.",
       "Our results highlight the importance of diverse image encoder pretraining for sim-to-real generalization, and identify on-policy learning as a key advantage of simulated training over training with real data.",
     ],
-    gallery: [
-      {
-        type: "image",
-        src: "static/media/faint_overview.jpg",
-        caption: "Visual abstract: simulator-trained policy deployed on a real robot.",
-      },
-    ],
+    gallery: [{ type: "image", src: "static/media/faint_overview.jpg", caption: "Visual abstract." }],
     youtube: [{ id: "ow7qDv9u51U", title: "Presentation" }],
+  },
+  {
+    id: "earthrover-challenge",
+    theme: "navigation",
+    year: 2025,
+    venue: "ICRA 2025 · 2nd place",
+    title: "The EarthRover Challenge at ICRA 2025: Runners-up",
+    short: "EarthRover Challenge",
+    authors: [A("Team Tampere University"), P("kuruppu")],
+    supervisor: "kamarainen",
+    featured: true,
+    links: {
+      page: "https://sasakuruppuarachchi.github.io/posts.html",
+      challenge: "https://earth-rover-challenge.github.io",
+    },
+    media: { type: "video", src: "static/media/earthrover.mp4", poster: "static/media/earthrover.jpg" },
+    tldr: "Remote navigation of robots in cities around the world over delayed, noisy sensor streams. Our filter + learned-policy system took 2nd place.",
+    abstractLabel: "Overview",
+    abstract: [
+      "EarthRover is a remote urban navigation competition: robots located in cities across the world are given GPS checkpoints, and teams must control them remotely using delayed and unreliable streams of camera, IMU, GPS and other sensors. Environments and mission difficulty vary (crowds, roads, sidewalks, obstacles), so the goal is to be robust, safe and generalize across seen and unseen conditions.",
+      "Our team combined a filter-based heading reference system, which fuses IMU and, when available, magnetometer and GPS into a stable compass, with a data-driven steering model that maps the available sensor streams to control commands. When sensor data is bad the system relies more on the heading reference; when visual cues are good the learned model takes more control. The system navigated several in-the-wild urban locations under varying lighting, traffic, pedestrian density and weather, placing 2nd overall.",
+    ],
+    gallery: [
+      { type: "image", src: "static/media/earthrover_mission.jpg", caption: "Mission overview." },
+      { type: "image", src: "static/media/earthrover_robot.jpg", caption: "The EarthRover robot." },
+    ],
   },
   {
     id: "placenav",
@@ -191,14 +198,14 @@ const PROJECTS = [
     short: "PlaceNav",
     authors: [P("suomela"), A("Jussi Kalliola"), A("Harry Edelman"), P("kamarainen")],
     supervisor: "kamarainen",
+    featured: true,
     links: {
       arxiv: "https://arxiv.org/abs/2309.17260",
       page: "https://lasuomela.github.io/placenav/",
       code: "https://github.com/lasuomela/placenav",
     },
     media: { type: "image", src: "static/media/placenav.webp" },
-    tldr:
-      "Visual place recognition for subgoal selection makes topological navigation faster and lets it learn from large non-robotics datasets: +76% success indoors, +23% outdoors.",
+    tldr: "Place recognition for subgoal selection makes topological navigation faster and trainable on non-robotics data: +76% success indoors, +23% outdoors.",
     abstract: [
       "Recent results suggest that splitting topological navigation into robot-independent and robot-specific components improves navigation performance by enabling the robot-independent part to be trained with data collected by different robot types. However, the navigation methods are still limited by the scarcity of suitable training data and suffer from poor computational scaling.",
       "In this work, we present PlaceNav, which subdivides the robot-independent part into navigation-specific and generic computer vision components. We utilize visual place recognition for the subgoal selection of the topological navigation pipeline. This makes subgoal selection more efficient and enables leveraging large-scale datasets from non-robotics sources, increasing training data availability. Bayesian filtering, enabled by place recognition, further improves navigation performance by increasing the temporal consistency of subgoals.",
@@ -210,158 +217,69 @@ const PROJECTS = [
     ],
   },
   {
-    id: "earthrover-challenge",
+    id: "carla-vloc",
     theme: "navigation",
-    year: 2025,
-    venue: "ICRA 2025 · 2nd place",
-    title: "The EarthRover Challenge at ICRA 2025: Runners-up",
-    short: "EarthRover Challenge",
-    authors: [A("Team Tampere University"), P("kuruppu")],
+    year: 2023,
+    venue: "WACV 2023",
+    title: "Benchmarking Visual Localization for Autonomous Navigation",
+    short: "Visual Localization Benchmark",
+    authors: [P("suomela"), A("Jussi Kalliola"), A("Atakan Dag"), A("Harry Edelman"), P("kamarainen")],
     supervisor: "kamarainen",
+    featured: true,
     links: {
-      page: "https://sasakuruppuarachchi.github.io/posts.html",
-      challenge: "https://earth-rover-challenge.github.io",
+      arxiv: "https://arxiv.org/abs/2203.13048",
+      page: "https://lasuomela.github.io/carla_vloc_benchmark/",
+      code: "https://github.com/lasuomela/carla_vloc_benchmark",
     },
-    media: {
-      type: "video",
-      src: "static/media/earthrover.mp4",
-      poster: "static/media/earthrover.jpg",
-    },
-    tldr:
-      "Remote urban navigation of robots in cities around the world, over delayed and noisy sensor streams. Our hybrid filter + learned-policy system took 2nd place.",
-    abstractLabel: "Overview",
+    media: { type: "video", src: "static/media/carla.mp4", poster: "static/media/carla.jpg" },
+    tldr: "A CARLA-based closed-loop benchmark: how do time of day, weather and viewpoint change affect a car that steers by visual localization?",
     abstract: [
-      "EarthRover is a remote urban navigation competition: robots located in cities across the world are given GPS checkpoints, and teams must control them remotely using delayed and unreliable streams of camera, IMU, GPS and other sensors. Environments and mission difficulty vary (crowds, roads, sidewalks, obstacles), so the goal is to be robust, safe and generalize across seen and unseen conditions.",
-      "Our team from Tampere University combined a filter-based heading reference system, which fuses IMU and, when available, magnetometer and GPS into a stable compass, with a data-driven steering model that maps the available sensor streams to control commands. When sensor data is bad the system relies more on the heading reference; when visual cues are good the learned model takes more control. The system navigated several in-the-wild urban locations under varying lighting, traffic, pedestrian density and weather, placing 2nd overall.",
+      "This work introduces a simulator-based benchmark for visual localization in the autonomous navigation context. The dynamic benchmark enables investigation of how variables such as the time of day, weather, and camera perspective affect the navigation performance of autonomous agents that utilize visual localization for closed-loop control. Our experiments study the effects of four such variables by evaluating state-of-the-art visual localization methods as part of the motion planning module of an autonomous navigation stack. The results show major variation in the suitability of the different methods for vision-based navigation. To the authors' best knowledge, the proposed benchmark is the first to study modern visual localization methods as part of a complete navigation stack.",
     ],
-    gallery: [
-      {
-        type: "image",
-        src: "static/media/earthrover_mission.jpg",
-        caption: "Mission overview.",
-      },
-      {
-        type: "image",
-        src: "static/media/earthrover_robot.jpg",
-        caption: "The EarthRover robot.",
-        portrait: true,
-      },
+    youtube: [
+      { id: "bAW3nfqSh2Q", title: "Benchmark" },
+      { id: "qgFp68cqqd8", title: "Experiments" },
     ],
-  },
-
-  /* ---------------------------------------------------------------- aerial */
-  {
-    id: "agipix",
-    theme: "aerial",
-    year: 2026,
-    venue: "ICUAS 2026",
-    title: "AgiPIX: Bridging Simulation and Reality in Indoor Aerial Inspection",
-    short: "AgiPIX",
-    authors: [
-      P("kuruppu"),
-      A("Juan Jose Garcia"),
-      A("Changda Tian"),
-      P("suomela"),
-      A("Panos Trahanias"),
-      A("Adriana Tapus"),
-      P("kamarainen"),
-    ],
-    supervisor: "kamarainen",
-    links: {
-      arxiv: "https://arxiv.org/abs/2604.08009",
-      page: "https://sasakuruppuarachchi.github.io/agipix/",
-      code: "https://github.com/sasakuruppuarachchi/agipix",
-    },
-    media: {
-      type: "video",
-      src: "static/media/agipix.mp4",
-      poster: "static/media/agipix.jpg",
-    },
-    tldr:
-      "An open, compact, actively sensed drone whose containerized ROS 2 autonomy stack runs unchanged in Isaac Sim and on real hardware.",
-    abstractLabel: "Overview",
-    abstract: [
-      "AgiPIX is an open, compact, actively sensed aerial robotics platform for indoor autonomy and critical-asset inspection. The same ROS 2 containerized autonomy stack runs in Isaac Sim and on real hardware, enabling fast and reproducible sim-to-real transfer.",
-    ],
-    highlights: [
-      "Sim-to-real deployability: identical ROS 2 containers and configs in Isaac Sim and on hardware, with zero code changes.",
-      "Open source: full bill of materials, CAD, simulation assets and the containerized ROS 2 stack.",
-      "Modular autonomy: perception, state estimation, mapping, planning, PX4 interface and logging as decoupled nodes.",
-      "Small form factor: compact 438 × 372 mm frame with protected sensing for narrow industrial spaces.",
-      "Sensor suite: 3D LiDAR, RGB camera and IMU in a LiDAR-inertial-visual stack for mapping and exploration.",
-    ],
-    gallery: [
-      {
-        type: "image",
-        src: "static/media/agipix_sim.jpg",
-        caption: "Digital twin in Isaac Sim.",
-      },
-      {
-        type: "image",
-        src: "static/media/agipix_real.jpg",
-        caption: "The physical platform runs the identical autonomy stack.",
-      },
-    ],
-    youtube: [{ id: "__Awe89ndag", title: "AgiPIX video presentation" }],
   },
   {
-    id: "emblio",
-    theme: "aerial",
-    year: 2025,
-    venue: "Ongoing work · 2025",
-    title: "Extended Model-Based Learned Inertial Odometry",
-    short: "Learned Inertial Odometry",
-    authors: [P("kuruppu"), P("kamarainen")],
-    supervisor: "kamarainen",
+    id: "beyond-fov",
+    theme: "navigation",
+    year: 2022,
+    venue: "arXiv 2022",
+    title: "Beyond Visual Field of View: Perceiving 3D Environment with Echoes and Vision",
+    short: "Echoes + Vision",
+    authors: [P("zhu"), P("rahtu"), A("Hang Zhao")],
+    supervisor: "rahtu",
     links: {
-      page: "https://sasakuruppuarachchi.github.io/posts.html",
+      arxiv: "https://arxiv.org/abs/2207.01136",
+      page: "https://ly-zhu.github.io/Beyond-Visual-Field-of-View",
     },
-    media: {
-      type: "video",
-      src: "static/media/emblio.mp4",
-      poster: "static/media/emblio.jpg",
-    },
-    tldr:
-      "IMU-only drone odometry that knows the physics: feeding full quadrotor dynamics, including body-frame torques, to the network cuts relative error by up to 61% on unseen trajectories.",
-    abstractLabel: "Overview",
+    media: { type: "image", src: "static/media/beyondfov.jpg" },
+    tldr: "Binaural echoes from several directions let a robot estimate depth far beyond what its camera sees, and help it navigate.",
     abstract: [
-      "Accurate state estimation is at the heart of agile drone flight. Cameras fail in low light, at high speed or in textureless environments, while inertial odometry from IMU data alone is lightweight and robust but drifts over time due to sensor noise and bias.",
-      "We propose a learning-based inertial odometry algorithm that integrates the full quadrotor dynamics, including body-frame torques, as model inputs. A Temporal Convolutional Network predicts short-term positional displacements from IMU and thrust data, which are fused by an Extended Kalman Filter for continuous pose estimation. Validated on the Blackbird and DIDO flight datasets and deployed on a real racing quadrotor, the method outperforms prior state-of-the-art inertial odometry on unseen trajectories, with up to 61% lower relative error than the original learned inertial odometry baseline.",
+      "This paper focuses on perceiving and navigating 3D environments using echoes and RGB image. In particular, we perform depth estimation by fusing RGB image with echoes, received from multiple orientations. Unlike previous works, we go beyond the field of view of the RGB and estimate dense depth maps for substantially larger parts of the environment. We show that the echoes provide holistic and in-expensive information about the 3D structures complementing the RGB image. Moreover, we study how echoes and the wide field-of-view depth maps can be utilised in robot navigation. We compare the proposed methods against recent baselines using two sets of challenging realistic 3D environments: Replica and Matterport3D.",
     ],
-    youtube: [{ id: "IsjZ-TeqXPM", title: "Extended Model-Based Learned Inertial Odometry" }],
+    gallery: [{ type: "image", src: "static/media/beyondfov_nav.jpg", caption: "Navigation with wide field-of-view depth from echoes." }],
   },
 
-  /* -------------------------------------------------------------------- 3d */
+  /* ==================================================================== 3d */
   {
     id: "ags-mesh",
     theme: "3d",
     year: 2025,
     venue: "3DV 2025",
-    title:
-      "AGS-Mesh: Adaptive Gaussian Splatting and Meshing with Geometric Priors for Indoor Room Reconstruction Using Smartphones",
+    title: "AGS-Mesh: Adaptive Gaussian Splatting and Meshing with Geometric Priors for Indoor Room Reconstruction Using Smartphones",
     short: "AGS-Mesh",
-    authors: [
-      P("ren"),
-      A("Matias Turkulainen", "https://maturk.github.io"),
-      A("Jiepeng Wang", "https://jiepengwang.github.io"),
-      A("Otto Seiskari", "https://oseiskar.github.io"),
-      A("Iaroslav Melekhov", "https://imelekhov.com"),
-      A("Juho Kannala", "https://users.aalto.fi/~kannalj1/"),
-      P("rahtu"),
-    ],
+    authors: [P("ren"), P("turkulainen"), A("Jiepeng Wang", "https://jiepengwang.github.io"), P("seiskari"), P("melekhov"), P("kannala"), P("rahtu")],
     supervisor: "rahtu",
+    featured: true,
     links: {
       arxiv: "https://arxiv.org/abs/2411.19271",
       page: "https://xuqianren.github.io/ags_mesh_website/",
       code: "https://github.com/XuqianRen/AGS_Mesh",
     },
-    media: {
-      type: "video",
-      src: "static/media/agsmesh.mp4",
-      poster: "static/media/agsmesh.jpg",
-    },
-    tldr:
-      "Accurate room-scale meshes from a smartphone: Gaussian splatting that adaptively trusts or ignores noisy depth and normal priors.",
+    media: { type: "video", src: "static/media/agsmesh.mp4", poster: "static/media/agsmesh.jpg" },
+    tldr: "Accurate room-scale meshes from a smartphone: Gaussian splatting that adaptively trusts or ignores noisy depth and normal priors.",
     abstract: [
       "Geometric priors are often used to enhance 3D reconstruction. With many smartphones featuring low-resolution depth sensors and the prevalence of off-the-shelf monocular geometry estimators, incorporating geometric priors as regularization signals has become common in 3D vision tasks. However, the accuracy of depth estimates from mobile devices is typically poor for highly detailed geometry, and monocular estimators often suffer from poor multi-view consistency and precision.",
       "In this work, we propose an approach for joint surface depth and normal refinement of Gaussian Splatting methods for accurate 3D reconstruction of indoor scenes. We develop supervision strategies that adaptively filter low-quality depth and normal estimates by comparing the consistency of the priors during optimization. We mitigate regularization in regions where prior estimates have high uncertainty or ambiguities. Our filtering strategy and optimization design demonstrate significant improvements in both mesh estimation and novel-view synthesis for both 3D and 2D Gaussian Splatting-based methods on challenging indoor room datasets.",
@@ -376,48 +294,45 @@ const PROJECTS = [
     venue: "WACV 2025",
     title: "DN-Splatter: Depth and Normal Priors for Gaussian Splatting and Meshing",
     short: "DN-Splatter",
-    authors: [
-      A("Matias Turkulainen", "https://maturk.github.io", "*"),
-      P("ren", "*"),
-      A("Iaroslav Melekhov", "https://imelekhov.com"),
-      A("Otto Seiskari", "https://oseiskar.github.io"),
-      P("rahtu"),
-      A("Juho Kannala", "https://users.aalto.fi/~kannalj1/"),
-    ],
+    authors: [P("turkulainen", "*"), P("ren", "*"), P("melekhov"), P("seiskari"), P("rahtu"), P("kannala")],
     note: "* equal contribution",
     supervisor: "rahtu",
+    featured: true,
     links: {
       arxiv: "https://arxiv.org/abs/2403.17822",
       page: "https://maturk.github.io/dn-splatter/",
       code: "https://github.com/maturk/dn-splatter",
     },
-    media: {
-      type: "video",
-      src: "static/media/dnsplatter_unicorn.mp4",
-      poster: "static/media/dnsplatter_unicorn.jpg",
-      portrait: true,
-    },
-    tldr:
-      "Depth and normal cues make 3D Gaussian splatting work on casually captured indoor scenes, and let meshes be extracted directly from the Gaussians.",
+    media: { type: "video", src: "static/media/dnsplatter_unicorn.mp4", poster: "static/media/dnsplatter_unicorn.jpg", portrait: true },
+    tldr: "Depth and normal cues make 3D Gaussian splatting work on casually captured indoor scenes and let meshes be extracted directly from the Gaussians.",
     abstract: [
       "3D Gaussian splatting, a novel differentiable rendering technique, has achieved state-of-the-art novel view synthesis results with high rendering speeds and relatively low training times. However, its performance on scenes commonly seen in indoor datasets is poor due to the lack of geometric constraints during optimization.",
       "We extend 3D Gaussian splatting with depth and normal cues to tackle challenging indoor datasets and showcase techniques for efficient mesh extraction, an important downstream application. Specifically, we regularize the optimization procedure with depth information, enforce local smoothness of nearby Gaussians, and use the geometry of the 3D Gaussians supervised by normal cues to achieve better alignment with the true scene geometry. We improve depth estimation and novel view synthesis results over baselines and show how this simple yet effective regularization technique can be used to directly extract meshes from the Gaussian representation yielding more physically accurate reconstructions on indoor scenes.",
     ],
     gallery: [
-      {
-        type: "video",
-        src: "static/media/dnsplatter_vase.mp4",
-        poster: "static/media/dnsplatter_vase.jpg",
-        caption: "Casual iPhone capture: Splatfacto vs. DN-Splatter.",
-        portrait: true,
-      },
-      {
-        type: "video",
-        src: "static/media/dnsplatter_shark.mp4",
-        poster: "static/media/dnsplatter_shark.jpg",
-        caption: "Casual iPhone capture: Splatfacto vs. DN-Splatter.",
-        portrait: true,
-      },
+      { type: "video", src: "static/media/dnsplatter_vase.mp4", poster: "static/media/dnsplatter_vase.jpg", caption: "Splatfacto vs. DN-Splatter.", portrait: true },
+      { type: "video", src: "static/media/dnsplatter_shark.mp4", poster: "static/media/dnsplatter_shark.jpg", caption: "Splatfacto vs. DN-Splatter.", portrait: true },
+      { type: "video", src: "static/media/dnsplatter_unicorn.mp4", poster: "static/media/dnsplatter_unicorn.jpg", caption: "Splatfacto vs. DN-Splatter.", portrait: true },
+    ],
+  },
+  {
+    id: "fiord",
+    theme: "3d",
+    year: 2025,
+    venue: "SCIA 2025",
+    title: "FIORD: A Fisheye Indoor-Outdoor Dataset with LIDAR Ground Truth for 3D Scene Reconstruction and Benchmarking",
+    short: "FIORD",
+    authors: [A("Ulas Gunes"), P("turkulainen"), P("ren"), A("Arno Solin", "https://users.aalto.fi/~asolin/"), P("kannala"), P("rahtu")],
+    supervisor: "rahtu",
+    featured: true,
+    links: {
+      arxiv: "https://arxiv.org/abs/2504.01732",
+      page: "https://parmisian.github.io/fiord360.github.io/",
+    },
+    media: { type: "video", src: "static/media/fiord.mp4", poster: "static/media/fiord.jpg" },
+    tldr: "Ten indoor and outdoor scenes captured with dual 200° fisheye lenses, with LIDAR point clouds as geometric ground truth.",
+    abstract: [
+      "The development of large-scale 3D scene reconstruction and novel view synthesis methods mostly rely on datasets comprising perspective images with narrow fields of view (FoV). While effective for small-scale scenes, these datasets require large image sets and extensive structure-from-motion (SfM) processing, limiting scalability. To address this, we introduce a fisheye image dataset tailored for scene reconstruction tasks. Using dual 200-degree fisheye lenses, our dataset provides full 360-degree coverage of 5 indoor and 5 outdoor scenes. Each scene has sparse SfM point clouds and precise LIDAR-derived dense point clouds that can be used as geometric ground-truth, enabling robust benchmarking under challenging conditions such as occlusions and reflections. While the baseline experiments focus on vanilla Gaussian Splatting and NeRF based Nerfacto methods, the dataset supports diverse approaches for scene reconstruction, novel view synthesis, and image-based rendering.",
     ],
   },
   {
@@ -425,39 +340,23 @@ const PROJECTS = [
     theme: "3d",
     year: 2025,
     venue: "3DV 2025",
-    title:
-      "GS-Pose: Generalizable Segmentation-based 6D Object Pose Estimation with 3D Gaussian Splatting",
+    title: "GS-Pose: Generalizable Segmentation-based 6D Object Pose Estimation with 3D Gaussian Splatting",
     short: "GS-Pose",
-    authors: [
-      P("cai"),
-      A("Janne Heikkilä", "https://www.oulu.fi/en/researchers/janne-heikkila"),
-      P("rahtu"),
-    ],
+    authors: [P("cai"), P("heikkila"), P("rahtu")],
     supervisor: "rahtu",
+    featured: true,
     links: {
       arxiv: "https://arxiv.org/abs/2403.10683",
       page: "https://dingdingcai.github.io/gs-pose/",
       code: "https://github.com/dingdingcai/GSPose",
     },
-    media: {
-      type: "video",
-      src: "static/media/gspose_tracking.mp4",
-      poster: "static/media/gspose_tracking.jpg",
-    },
-    tldr:
-      "Capture a new object with a phone, then locate it and estimate its 6D pose in any image, refined by render-and-compare with 3D Gaussian splatting.",
+    media: { type: "video", src: "static/media/gspose_tracking.mp4", poster: "static/media/gspose_tracking.jpg" },
+    tldr: "Capture a new object with a phone, then find it and estimate its 6D pose in any image, refined by render-and-compare with Gaussian splatting.",
     abstract: [
       "This paper introduces GS-Pose, an end-to-end framework for locating and estimating the 6D pose of objects. GS-Pose begins with a set of posed RGB images of a previously unseen object and builds three distinct representations stored in a database. At inference, GS-Pose operates sequentially by locating the object in the input image, estimating its initial 6D pose using a retrieval approach, and refining the pose with a render-and-compare method.",
       "The key insight is the application of the appropriate object representation at each stage of the process. In particular, for the refinement step, we utilize 3D Gaussian splatting, a novel differentiable rendering technique that offers high rendering speed and relatively low optimization time. Off-the-shelf toolchains and commodity hardware, such as mobile phones, can be used to capture new objects to be added to the database. Extensive evaluations on the LINEMOD and OnePose-LowTexture datasets demonstrate excellent performance, establishing the new state-of-the-art.",
     ],
-    gallery: [
-      {
-        type: "video",
-        src: "static/media/gspose.mp4",
-        poster: "static/media/gspose.jpg",
-        caption: "Overview: build the object database, then detect, initialize and refine the 6D pose.",
-      },
-    ],
+    gallery: [{ type: "video", src: "static/media/gspose.mp4", poster: "static/media/gspose.jpg", caption: "Pipeline: build the object database, then detect, initialize and refine the pose." }],
     youtube: [{ id: "SnJazusDLM8", title: "Demo video" }],
   },
   {
@@ -465,37 +364,333 @@ const PROJECTS = [
     theme: "3d",
     year: 2024,
     venue: "WACV 2024",
-    title:
-      "MuSHRoom: Multi-Sensor Hybrid Room Dataset for Joint 3D Reconstruction and Novel View Synthesis",
+    title: "MuSHRoom: Multi-Sensor Hybrid Room Dataset for Joint 3D Reconstruction and Novel View Synthesis",
     short: "MuSHRoom",
-    authors: [
-      P("ren"),
-      A("Wenjia Wang", "https://wenjiawang0312.github.io"),
-      P("cai"),
-      A("Tuuli Tuominen"),
-      A("Juho Kannala", "https://users.aalto.fi/~kannalj1/"),
-      P("rahtu"),
-    ],
+    authors: [P("ren"), A("Wenjia Wang", "https://wenjiawang0312.github.io"), P("cai"), A("Tuuli Tuominen"), P("kannala"), P("rahtu")],
     supervisor: "rahtu",
+    featured: true,
     links: {
       arxiv: "https://arxiv.org/abs/2311.02778",
       page: "https://xuqianren.github.io/publications/MuSHRoom/",
       code: "https://github.com/TUTvision/MuSHRoom",
     },
-    media: {
-      type: "video",
-      src: "static/media/mushroom.mp4",
-      poster: "static/media/mushroom.jpg",
-    },
-    tldr:
-      "Ten real rooms captured with Kinect, iPhone and a Faro laser scanner: a benchmark for doing 3D reconstruction and photorealistic rendering together on consumer devices.",
+    media: { type: "video", src: "static/media/mushroom.mp4", poster: "static/media/mushroom.jpg" },
+    tldr: "Ten real rooms captured with Kinect, iPhone and a laser scanner: a benchmark for 3D reconstruction and photorealistic rendering on consumer devices.",
     abstract: [
       "Metaverse technologies demand accurate, real-time, and immersive modeling on consumer-grade hardware for both non-human perception (e.g., drone/robot/autonomous car navigation) and immersive technologies like AR/VR, requiring both structural accuracy and photorealism. However, there exists a knowledge gap in how to apply geometric reconstruction and photorealism modeling (novel view synthesis) in a unified framework.",
-      "To address this gap and promote the development of robust and immersive modeling and rendering with consumer-grade devices, we propose a real-world Multi-Sensor Hybrid Room Dataset (MuSHRoom). Our dataset presents exciting challenges and requires state-of-the-art methods to be cost-effective, robust to noisy data and devices, and can jointly learn 3D reconstruction and novel view synthesis instead of treating them as separate tasks, making them ideal for real-world applications. We benchmark several famous pipelines on our dataset for joint 3D mesh reconstruction and novel view synthesis. Our dataset and benchmark show great potential in promoting the improvements for fusing 3D reconstruction and high-quality rendering in a robust and computationally efficient end-to-end fashion.",
+      "To address this gap and promote the development of robust and immersive modeling and rendering with consumer-grade devices, we propose a real-world Multi-Sensor Hybrid Room Dataset (MuSHRoom). Our dataset presents exciting challenges and requires state-of-the-art methods to be cost-effective, robust to noisy data and devices, and can jointly learn 3D reconstruction and novel view synthesis instead of treating them as separate tasks, making them ideal for real-world applications. We benchmark several famous pipelines on our dataset for joint 3D mesh reconstruction and novel view synthesis.",
+    ],
+  },
+  {
+    id: "msda",
+    theme: "3d",
+    year: 2023,
+    venue: "SCIA 2023",
+    title: "MSDA: Monocular Self-supervised Domain Adaptation for 6D Object Pose Estimation",
+    short: "MSDA",
+    authors: [P("cai"), P("heikkila"), P("rahtu")],
+    supervisor: "rahtu",
+    links: { arxiv: "https://arxiv.org/abs/2302.07300" },
+    media: { type: "image", src: "static/media/msda.jpg" },
+    tldr: "Close the synthetic-to-real gap in 6D pose estimation using unlabeled real RGB(-D) images.",
+    abstract: [
+      "Acquiring labeled 6D poses from real images is an expensive and time-consuming task. Though massive amounts of synthetic RGB images are easy to obtain, the models trained on them suffer from noticeable performance degradation due to the synthetic-to-real domain gap. To mitigate this degradation, we propose a practical self-supervised domain adaptation approach that takes advantage of real RGB(-D) data without needing real pose labels. We first pre-train the model with synthetic RGB images and then utilize real RGB(-D) images to fine-tune the pre-trained model. The fine-tuning process is self-supervised by the RGB-based pose-aware consistency and the depth-guided object distance pseudo-label, which does not require the time-consuming online differentiable rendering. We build our domain adaptation method upon the recent pose estimator SC6D and evaluate it on the YCB-Video dataset. We experimentally demonstrate that our method achieves comparable performance against its fully-supervised counterpart while outperforming existing state-of-the-art approaches.",
+    ],
+  },
+  {
+    id: "sc6d",
+    theme: "3d",
+    year: 2022,
+    venue: "3DV 2022",
+    title: "SC6D: Symmetry-agnostic and Correspondence-free 6D Object Pose Estimation",
+    short: "SC6D",
+    authors: [P("cai"), P("heikkila"), P("rahtu")],
+    supervisor: "rahtu",
+    links: {
+      arxiv: "https://arxiv.org/abs/2208.02129",
+      code: "https://github.com/dingdingcai/SC6D-pose",
+    },
+    media: { type: "image", src: "static/media/sc6d.jpg" },
+    tldr: "6D pose from a single RGB image without a CAD model or any knowledge of the object's symmetries.",
+    abstract: [
+      "This paper presents an efficient symmetry-agnostic and correspondence-free framework, referred to as SC6D, for 6D object pose estimation from a single monocular RGB image. SC6D requires neither the 3D CAD model of the object nor any prior knowledge of the symmetries. The pose estimation is decomposed into three sub-tasks: a) object 3D rotation representation learning and matching; b) estimation of the 2D location of the object center; and c) scale-invariant distance estimation (the translation along the z-axis) via classification. SC6D is evaluated on three benchmark datasets, T-LESS, YCB-V, and ITODD, and results in state-of-the-art performance on the T-LESS dataset. Moreover, SC6D is computationally much more efficient than the previous state-of-the-art method SurfEmb.",
+    ],
+  },
+  {
+    id: "ove6d",
+    theme: "3d",
+    year: 2022,
+    venue: "CVPR 2022",
+    title: "OVE6D: Object Viewpoint Encoding for Depth-based 6D Object Pose Estimation",
+    short: "OVE6D",
+    authors: [P("cai"), P("heikkila"), P("rahtu")],
+    supervisor: "rahtu",
+    links: {
+      arxiv: "https://arxiv.org/abs/2203.01072",
+      page: "https://dingdingcai.github.io/ove6d-pose/",
+      code: "https://github.com/dingdingcai/OVE6D-pose",
+    },
+    media: { type: "image", src: "static/media/ove6d.jpg" },
+    tldr: "One universal pose model trained on 19,000 synthetic ShapeNet objects that works on new real objects without fine-tuning.",
+    abstract: [
+      "This paper proposes a universal framework, called OVE6D, for model-based 6D object pose estimation from a single depth image and a target object mask. Our model is trained using purely synthetic data rendered from ShapeNet, and, unlike most of the existing methods, it generalizes well on new real-world objects without any fine-tuning. We achieve this by decomposing the 6D pose into viewpoint, in-plane rotation around the camera optical axis and translation, and introducing novel lightweight modules for estimating each component in a cascaded manner. The resulting network contains less than 4M parameters while demonstrating excellent performance on the challenging T-LESS and Occluded LINEMOD datasets without any dataset-specific training. We show that OVE6D outperforms some contemporary deep learning-based pose estimation methods specifically trained for individual objects or datasets with real-world training data.",
+    ],
+    youtube: [{ id: "zBSH-k9GbV4", title: "OVE6D video" }],
+  },
+
+  /* ================================================================ aerial */
+  {
+    id: "agipix",
+    theme: "aerial",
+    year: 2026,
+    venue: "ICUAS 2026",
+    title: "AgiPIX: Bridging Simulation and Reality in Indoor Aerial Inspection",
+    short: "AgiPIX",
+    authors: [P("kuruppu"), A("Juan Jose Garcia"), A("Changda Tian"), P("suomela"), A("Panos Trahanias"), A("Adriana Tapus"), P("kamarainen")],
+    supervisor: "kamarainen",
+    featured: true,
+    links: {
+      arxiv: "https://arxiv.org/abs/2604.08009",
+      page: "https://sasakuruppuarachchi.github.io/agipix/",
+      code: "https://github.com/sasakuruppuarachchi/agipix",
+    },
+    media: { type: "video", src: "static/media/agipix.mp4", poster: "static/media/agipix.jpg" },
+    tldr: "An open, compact drone whose containerized ROS 2 autonomy stack runs unchanged in Isaac Sim and on real hardware.",
+    abstractLabel: "Overview",
+    abstract: [
+      "AgiPIX is an open, compact, actively sensed aerial robotics platform for indoor autonomy and critical-asset inspection. The same ROS 2 containerized autonomy stack runs in Isaac Sim and on real hardware, enabling fast and reproducible sim-to-real transfer.",
+    ],
+    highlights: [
+      "Sim-to-real deployability: identical ROS 2 containers and configs in Isaac Sim and on hardware, with zero code changes.",
+      "Open source: full bill of materials, CAD, simulation assets and the containerized ROS 2 stack.",
+      "Modular autonomy: perception, state estimation, mapping, planning, PX4 interface and logging as decoupled nodes.",
+      "Small form factor: 438 × 372 mm frame with protected sensing for narrow industrial spaces.",
+      "Sensor suite: 3D LiDAR, RGB camera and IMU in a LiDAR-inertial-visual stack for mapping and exploration.",
+    ],
+    gallery: [
+      { type: "image", src: "static/media/agipix_sim.jpg", caption: "Digital twin in Isaac Sim." },
+      { type: "image", src: "static/media/agipix_real.jpg", caption: "The physical platform runs the identical stack." },
+    ],
+    youtube: [{ id: "__Awe89ndag", title: "AgiPIX video presentation" }],
+  },
+  {
+    id: "enrich-2025",
+    theme: "aerial",
+    year: 2025,
+    venue: "IEEE SSRR 2025",
+    title: "Low-Cost Rapid-Development Air-Ground Robotic Solution for Nuclear Power Plant Inspection",
+    short: "EnRicH 2025 Hackathon",
+    authors: [P("kuruppu"), A("RAICAM doctoral cohort", "https://raicam.eu/")],
+    supervisor: "kamarainen",
+    featured: true,
+    links: { page: "https://sasakuruppuarachchi.github.io/posts.html" },
+    media: { type: "video", src: "static/media/enrich.mp4", poster: "static/media/enrich.jpg" },
+    tldr: "A drone and a ground robot built in three weeks for mapping and radiation detection inside the decommissioned Zwentendorf nuclear power plant.",
+    abstractLabel: "Overview",
+    abstract: [
+      "In June 2025 the team took part in the EnRicH 2025 robotics hackathon at the decommissioned Zwentendorf Nuclear Power Plant in Austria. The goal was a robotic system for mapping, radiation detection and inspection in an environment where GPS is unavailable, communication is unreliable and radiation can be hazardous for humans.",
+      "In three weeks, using off-the-shelf parts, 3D-printed components and open-source ROS 2 and PX4, the team built a quadrotor with LiDAR, IMU and a Geiger counter for aerial radiation mapping, and an Ackermann-steering ground robot for 3D mapping in tight corridors. Both share an NVIDIA Orin NX running perception, SLAM (DLIO, LIO-SAM) and navigation; the ground robot explores autonomously with frontier-based mapping, and the drone flies RRT* / minimum-snap trajectories. A mesh Wi-Fi network with repeaters kept the robots connected behind thick concrete walls. All designs and ROS 2 packages are open source.",
+    ],
+    gallery: [
+      { type: "image", src: "static/media/enrich_team.jpg", caption: "At the Zwentendorf nuclear power plant." },
+      { type: "image", src: "static/media/enrich_drones.jpg", caption: "The aerial platforms." },
+    ],
+    youtube: [{ id: "2tGLv7bt3f8", title: "Multi-domain system in endurance test" }],
+  },
+  {
+    id: "emblio",
+    theme: "aerial",
+    year: 2025,
+    venue: "Ongoing work · 2025",
+    title: "Extended Model-Based Learned Inertial Odometry",
+    short: "Learned Inertial Odometry",
+    authors: [P("kuruppu"), P("kamarainen")],
+    supervisor: "kamarainen",
+    featured: true,
+    links: { page: "https://sasakuruppuarachchi.github.io/posts.html" },
+    media: { type: "video", src: "static/media/emblio.mp4", poster: "static/media/emblio.jpg" },
+    tldr: "IMU-only drone odometry that knows the physics: feeding full quadrotor dynamics to the network cuts error by up to 61% on unseen trajectories.",
+    abstractLabel: "Overview",
+    abstract: [
+      "Accurate state estimation is at the heart of agile drone flight. Cameras fail in low light, at high speed or in textureless environments, while inertial odometry from IMU data alone is lightweight and robust but drifts over time due to sensor noise and bias.",
+      "We propose a learning-based inertial odometry algorithm that integrates the full quadrotor dynamics, including body-frame torques, as model inputs. A Temporal Convolutional Network predicts short-term positional displacements from IMU and thrust data, which are fused by an Extended Kalman Filter for continuous pose estimation. Validated on the Blackbird and DIDO flight datasets and deployed on a real racing quadrotor, the method outperforms prior state-of-the-art inertial odometry on unseen trajectories, with up to 61% lower relative error than the original learned inertial odometry baseline.",
+    ],
+    youtube: [{ id: "IsjZ-TeqXPM", title: "Extended Model-Based Learned Inertial Odometry" }],
+  },
+  {
+    id: "raicam-sprints",
+    theme: "aerial",
+    year: 2025,
+    venue: "TAROS 2025",
+    title: "Lessons Learned from the RAICAM Doctoral Network Research Sprints",
+    short: "RAICAM Air-Ground Demo",
+    authors: [
+      A("Alperen Kenan"), A("Sahar Sadeghi Kordkheili"), A("Juan Jose Garcia Cardenas"), A("Alessandro Melone"),
+      A("Changda Tian"), A("Haichuan Li"), A("Hamidreza Raei"), P("kuruppu"), A("Yifeng Tang"), A("Adriana Tapus"),
+      A("Anibal Ollero"), A("Arash Ajoudani"), A("Begoña C. Arrue"), A("Dimitrios Papageorgiou"), P("kamarainen"),
+      A("Jukka Heikkonen"), A("Luis Figueredo"), A("Manuel Giuliani"), A("Panos Trahanias"), A("Paul Bremner"),
+      A("Saeed Rafee Nekoo"), A("Simon Watson"), A("Tomi Westerlund"),
+    ],
+    supervisor: "kamarainen",
+    featured: true,
+    links: {
+      paper: "https://doi.org/10.1007/978-3-032-01486-3_40",
+      page: "https://raicam.eu/",
+    },
+    media: { type: "video", src: "static/media/raicam.mp4", poster: "static/media/raicam.jpg" },
+    tldr: "Aerial and ground robots that share a semantic map and plan together to inspect industrial facilities, demonstrated live at ENSTA Paris.",
+    abstractLabel: "Overview",
+    abstract: [
+      "RAICAM (Robotics and Artificial Intelligence for Critical Asset Monitoring) builds a framework that lets aerial and ground robots work together autonomously on inspection and mapping tasks in factories, warehouses and power plants. Drones are agile but have limited endurance and payload; ground robots carry heavier sensors for longer but are constrained by terrain.",
+      "A ROS 2 architecture lets both robots share real-time state, a unified semantic map that merges LiDAR, visual and inertial data, and task goals. Decentralized trajectory generation lets the robots plan around each other, and a web interface keeps a human operator in the loop. The full system was demonstrated at ENSTA Paris in a mock industrial environment with stairs, corridors and elevated pipelines, and presented at TAROS 2025.",
+    ],
+    gallery: [
+      { type: "image", src: "static/media/raicam_robots.jpg", caption: "Air-ground robot team." },
+      { type: "image", src: "static/media/raicam_team.jpg", caption: "RAICAM research sprint." },
+    ],
+    youtube: [{ id: "clg4_2iWDi0", title: "RAICAM: ENSTA Paris demonstration" }],
+  },
+
+  /* ============================================================== learning */
+  {
+    id: "seq2seq-tactile",
+    theme: "learning",
+    year: 2023,
+    venue: "ICRA 2023",
+    title: "Seq2Seq Imitation Learning for Tactile Feedback-based Manipulation",
+    short: "Seq2Seq Tactile IL",
+    authors: [P("yang"), A("Alexandre Angleraud"), A("Roel S. Pieters"), P("pajarinen"), P("kamarainen")],
+    supervisor: "kamarainen",
+    links: { arxiv: "https://arxiv.org/abs/2303.02646" },
+    media: { type: "image", src: "static/media/wy_seq2seq.jpg" },
+    tldr: "Contact-rich manipulation (door opening, snap-on insertion) learned from only 50 demonstrations where RL and IL baselines fail.",
+    abstract: [
+      "Robot control for tactile feedback based manipulation can be difficult due to modeling of physical contacts, partial observability of the environment, and noise in perception and control. This work focuses on solving partial observability of contact-rich manipulation tasks as a Sequence-to-Sequence (Seq2Seq) Imitation Learning (IL) problem. The proposed Seq2Seq model first produces a robot-environment interaction sequence to estimate the partially observable environment state variables, and then, the observed interaction sequence is transformed to a control sequence for the task itself. The proposed Seq2Seq IL for tactile feedback based manipulation is experimentally validated on a door-open task in a simulated environment and a snap-on insertion task with a real robot. The model is able to learn both tasks from only 50 expert demonstrations while state-of-the-art reinforcement learning and imitation learning methods fail.",
+    ],
+  },
+  {
+    id: "swapped-gcrl",
+    theme: "learning",
+    year: 2023,
+    venue: "arXiv 2023",
+    title: "Swapped Goal-Conditioned Offline Reinforcement Learning",
+    short: "Goal-Swapping Offline RL",
+    authors: [P("yang"), A("Huiling Wang"), P("cai"), P("pajarinen"), P("kamarainen")],
+    supervisor: "kamarainen",
+    links: { arxiv: "https://arxiv.org/abs/2302.08865" },
+    media: { type: "image", src: "static/media/wy_offline_gcrl.jpg" },
+    tldr: "Goal-swapping creates new training trajectories so offline agents generalize, even on dexterous in-hand manipulation.",
+    abstractLabel: "Summary",
+    abstract: [
+      "Offline goal-conditioned reinforcement learning can overfit to the given dataset. To generalize the agent's skills outside the dataset, we propose a goal-swapping procedure that generates additional trajectories, and, to alleviate noise and extrapolation errors, a general offline RL method called deterministic Q-advantage policy gradient (DQAPG). DQAPG outperforms state-of-the-art goal-conditioned offline RL methods in a wide range of benchmark tasks, goal-swapping further improves the results, and the method performs well on challenging dexterous in-hand manipulation tasks where prior methods failed.",
+    ],
+  },
+  {
+    id: "pgser",
+    theme: "learning",
+    year: 2023,
+    venue: "ICLR 2023 Workshop (RRL)",
+    title: "Prioritized Offline Goal-swapping Experience Replay",
+    short: "PGSER",
+    authors: [P("yang"), P("pajarinen"), P("cai"), P("kamarainen")],
+    supervisor: "kamarainen",
+    links: { arxiv: "https://arxiv.org/abs/2302.07741" },
+    media: { type: "image", src: "static/media/wy_pger.jpg" },
+    tldr: "A pre-trained Q function decides which goal-swapped transitions are worth replaying.",
+    abstractLabel: "Summary",
+    abstract: [
+      "In goal-conditioned offline reinforcement learning, an agent learns from previously collected data to go to an arbitrary goal. Goal-swapping generates additional data by switching trajectory goals, but produces many invalid trajectories. Prioritized goal-swapping experience replay (PGSER) uses a pre-trained Q function to give higher priority to goal-swapped transitions that allow reaching the goal, significantly improving over baselines on a wide range of benchmarks, including previously unsolved dexterous in-hand manipulation tasks.",
+    ],
+  },
+  {
+    id: "cemd",
+    theme: "learning",
+    year: 2022,
+    venue: "NeurIPS 2022 Workshop (Deep RL)",
+    title: "Constrained Imitation Q-learning with Earth Mover's Distance Reward",
+    short: "CEMD",
+    authors: [P("yang"), A("Nataliya Strokina"), P("pajarinen"), P("kamarainen")],
+    supervisor: "kamarainen",
+    links: { paper: "https://openreview.net/pdf?id=rzfPNkOyC7O" },
+    media: { type: "image", src: "static/media/wy_cemd.jpg" },
+    tldr: "Combining the exploration of RL with the sample efficiency of imitation through a constrained Earth Mover's Distance reward.",
+    abstractLabel: "Summary",
+    abstract: [
+      "Constrained Earth Mover's Distance (CEMD) Imitation Q-learning combines the exploration power of reinforcement learning with the sample efficiency of imitation learning. Immediate rewards are computed by a greedy variant of the Earth Mover's Distance between observed state-action pairs and expert demonstrations; CEMD constrains this otherwise non-stationary reward with a greedy EMD upper-bound estimate and a generic Q-learning lower bound. On PyBullet continuous-control benchmarks CEMD is more sample-efficient, reaches higher performance and has lower variance than its competitors.",
+    ],
+  },
+  {
+    id: "visual-rewards-pile",
+    theme: "learning",
+    year: 2022,
+    venue: "Frontiers in Robotics and AI 2022",
+    title: "Visual Rewards From Observation for Sequential Tasks: Autonomous Pile Loading",
+    short: "Visual Rewards",
+    authors: [A("Nataliya Strokina"), P("yang"), P("pajarinen"), A("Nikolay Serbenyuk"), P("kamarainen"), A("Reza Ghabcheloo")],
+    supervisor: "kamarainen",
+    links: { paper: "https://www.frontiersin.org/journals/robotics-and-ai/articles/10.3389/frobt.2022.838059" },
+    tldr: "Rewards learned from camera observations of task progress, tested on a real wheel loader in summer, autumn and winter.",
+    abstractLabel: "Summary",
+    abstract: [
+      "Designing reward functions is a key challenge for applying reinforcement learning to real robots, especially in field robotics with little data, limited training time and highly varying conditions. This work reviews reward learning and visual representations in robotics and studies a practical approach that associates the reward with the stage of task progress observed visually. It is tested on a real-scale application, autonomous pile loading, outdoors in summer, autumn and winter; the cumulative reward combines predictions of the process stage and of task completion, using supervised classifiers on common visual representations and task-specific contrastive features.",
+    ],
+  },
+  {
+    id: "hybrid-sim2real",
+    theme: "learning",
+    year: 2021,
+    venue: "IROS 2021",
+    title: "Monolithic vs. Hybrid Controller for Multi-objective Sim-to-Real Learning",
+    short: "Hybrid Sim-to-Real",
+    authors: [A("Atakan Dag"), A("Alexandre Angleraud"), P("yang"), A("Nataliya Strokina"), A("Roel S. Pieters"), A("Minna Lanz"), P("kamarainen")],
+    supervisor: "kamarainen",
+    links: {
+      arxiv: "https://arxiv.org/abs/2108.07514",
+      code: "https://github.com/atakandag/multi-objective-sim2real",
+    },
+    media: { type: "image", src: "static/media/wy_hybrid.jpg" },
+    tldr: "For a manipulator that must reach a target and avoid an obstacle, switching between single-objective controllers beats one multi-term reward.",
+    abstractLabel: "Summary",
+    abstract: [
+      "Sim-to-Real is an attractive way to build controllers for robotic tasks that are easier to simulate than to solve analytically. Real applications often have several simultaneous objectives, such as \"reach the target\" but \"avoid obstacles\". We compare a monolithic RL controller trained with a multi-term reward against a hybrid of pre-trained single-objective controllers with a switching rule, on a manipulator that reaches a target while avoiding an obstacle. The hybrid controller is easier to train and gives a better success-failure trade-off; controllers trained in simulation were verified on a real set-up.",
+    ],
+  },
+  {
+    id: "pile-loading-revised",
+    theme: "learning",
+    year: 2021,
+    venue: "ICRA 2021",
+    title: "Neural Network Controller for Autonomous Pile Loading Revised",
+    short: "Pile Loading Revised",
+    authors: [P("yang"), A("Nataliya Strokina"), A("Nikolay Serbenyuk"), P("pajarinen"), A("Reza Ghabcheloo"), A("Juho Vihonen"), A("Mohammad M. Aref"), P("kamarainen")],
+    supervisor: "kamarainen",
+    links: { arxiv: "https://arxiv.org/abs/2103.12379" },
+    media: { type: "image", src: "static/media/wy_nn_pile.jpg" },
+    tldr: "A wheel-loader controller trained in summer that still loads piles successfully in winter.",
+    abstractLabel: "Summary",
+    abstract: [
+      "Two pile loading controllers learned from human demonstrations, a neural network and a random forest, were previously tested in the field, with the random forest clearly better. Testing these summer-trained controllers in winter drastically revised the findings and revealed the need for more sensors, more data and a controller able to use them. The revised neural controller (NNetV2) has a more expressive structure and uses neural attention to focus on important parts of the sensor and control signals. Trained and tested on the same data, it is more robust to drastically changing conditions and achieves a superior success rate: the first learning-based controller for a heavy-duty machine shown to work in winter after training in summer.",
+    ],
+  },
+  {
+    id: "pile-loading",
+    theme: "learning",
+    year: 2020,
+    venue: "ICRA 2020",
+    title: "Learning a Pile Loading Controller from Demonstrations",
+    short: "Pile Loading from Demonstrations",
+    authors: [P("yang"), A("Nataliya Strokina"), A("Nikolay Serbenyuk"), A("Reza Ghabcheloo"), P("kamarainen")],
+    supervisor: "kamarainen",
+    links: { paper: "https://ieeexplore.ieee.org/document/9196907" },
+    media: { type: "image", src: "static/media/wy_rf_pile.jpg" },
+    tldr: "An autonomous wheel loader that learns pile loading from a handful of human demonstrations.",
+    abstractLabel: "Summary",
+    abstract: [
+      "A learning-based pile loading controller for autonomous robotic wheel loaders. Its parameters are learned from a small number of demonstrations recording low-level sensors (boom angle, bucket angle, hydrostatic driving pressure), egocentric video and control signals. Task-specific deep visual features are learned with a Siamese network and a combination of cross-entropy and contrastive loss, and a random forest regressor provides robustness to changes in loading distance, soil type, weather and illumination. Deployed on a real autonomous wheel loader, it outperforms prior art by a clear margin.",
     ],
   },
 
-  /* --------------------------------------------------------------- imaging */
+  /* =============================================================== imaging */
   {
     id: "davide",
     theme: "imaging",
@@ -503,82 +698,353 @@ const PROJECTS = [
     venue: "ECCV 2024 Workshops (AIM)",
     title: "DAVIDE: Depth-Aware Video Deblurring",
     short: "DAVIDE",
-    authors: [
-      P("torres"),
-      A("Jussi Kalliola"),
-      A("Soumya Tripathy"),
-      A("Erman Acar"),
-      P("kamarainen"),
-    ],
+    authors: [P("torres"), A("Jussi Kalliola"), P("tripathy"), A("Erman Acar"), P("kamarainen")],
     supervisor: "kamarainen",
+    featured: true,
     links: {
       paper: "https://link.springer.com/chapter/10.1007/978-3-031-91838-4_10",
       arxiv: "https://arxiv.org/abs/2409.01274",
       page: "https://germanftv.github.io/DAVIDE.github.io/",
       code: "https://github.com/germanftv/DAVIDE-Benckmark",
     },
-    media: {
-      type: "video",
-      src: "static/media/davide_robot04.mp4",
-      poster: "static/media/davide_robot04.jpg",
-    },
-    tldr:
-      "A new dataset of synchronized blurred, sharp and depth videos, and a depth-aware transformer that shows when depth helps video deblurring.",
+    media: { type: "video", src: "static/media/davide_robot04.mp4", poster: "static/media/davide_robot04.jpg" },
+    tldr: "Synchronized blurred, sharp and depth videos, and a depth-aware transformer that shows when depth helps deblurring.",
     abstract: [
       "Video deblurring aims at recovering sharp details from a sequence of blurry frames. Despite the proliferation of depth sensors in mobile phones and the potential of depth information to guide deblurring, depth-aware deblurring has received only limited attention. In this work, we introduce the 'Depth-Aware VIdeo DEblurring' (DAVIDE) dataset to study the impact of depth information in video deblurring. The dataset comprises synchronized blurred, sharp, and depth videos.",
       "We investigate how the depth information should be injected into the existing deep RGB video deblurring models, and propose a strong baseline for depth-aware video deblurring. Our findings reveal the significance of depth information in video deblurring and provide insights into the use cases where depth cues are beneficial. In addition, our results demonstrate that while the depth improves deblurring performance, this effect diminishes when models are provided with a longer temporal context.",
     ],
     gallery: [
-      {
-        type: "video",
-        src: "static/media/davide_farm03.mp4",
-        poster: "static/media/davide_farm03.jpg",
-        caption: "Dataset sample: blurred | depth | sharp.",
-      },
-      {
-        type: "video",
-        src: "static/media/davide_play_ground05.mp4",
-        poster: "static/media/davide_play_ground05.jpg",
-        caption: "Dataset sample: blurred | depth | sharp.",
-      },
-      {
-        type: "video",
-        src: "static/media/davide_indoors02.mp4",
-        poster: "static/media/davide_indoors02.jpg",
-        caption: "Dataset sample: blurred | depth | sharp.",
-      },
-      {
-        type: "video",
-        src: "static/media/davide_toy01.mp4",
-        poster: "static/media/davide_toy01.jpg",
-        caption: "Dataset sample: blurred | depth | sharp.",
-      },
+      { type: "video", src: "static/media/davide_farm03.mp4", poster: "static/media/davide_farm03.jpg", caption: "Blurred | depth | sharp." },
+      { type: "video", src: "static/media/davide_play_ground05.mp4", poster: "static/media/davide_play_ground05.jpg", caption: "Blurred | depth | sharp." },
+      { type: "video", src: "static/media/davide_indoors02.mp4", poster: "static/media/davide_indoors02.jpg", caption: "Blurred | depth | sharp." },
+      { type: "video", src: "static/media/davide_toy01.mp4", poster: "static/media/davide_toy01.jpg", caption: "Blurred | depth | sharp." },
     ],
     youtube: [{ id: "l4LCy6LROL0", title: "Video results" }],
   },
-];
+  {
+    id: "parallax-icb",
+    theme: "imaging",
+    year: 2023,
+    venue: "SCIA 2023",
+    title: "Depth-Aware Image Compositing Model for Parallax Camera Motion Blur",
+    short: "ParallaxICB",
+    authors: [P("torres"), P("kamarainen")],
+    supervisor: "kamarainen",
+    links: {
+      paper: "https://link.springer.com/chapter/10.1007/978-3-031-31435-3_19",
+      arxiv: "https://arxiv.org/abs/2303.09334",
+      page: "https://germanftv.github.io/ParallaxICB.github.io/",
+      code: "https://github.com/germanftv/ParallaxICB",
+    },
+    media: { type: "image", src: "static/media/parallaxicb.jpg" },
+    tldr: "Realistic depth-dependent motion blur from one image, a depth map and a camera trajectory, and sharp neural scenes learned from blur.",
+    abstractLabel: "Summary",
+    abstract: [
+      "Camera motion introduces spatially varying blur due to the depth changes in the 3D world. This work investigates scene configurations where such blur is produced under parallax camera motion. We present a simple, yet accurate, Image Compositing Blur (ICB) model for depth-dependent spatially varying blur that produces realistic motion blur from a single image, depth map, and camera trajectory. Furthermore, we utilize the ICB model, combined with a coordinate-based MLP, to learn a sharp neural representation from the blurred input. Experimental results are reported for synthetic and real examples.",
+    ],
+  },
+  {
+    id: "facegan",
+    theme: "imaging",
+    year: 2021,
+    venue: "WACV 2021",
+    title: "FACEGAN: Facial Attribute Controllable rEenactment GAN",
+    short: "FACEGAN",
+    authors: [P("tripathy"), P("kannala"), P("rahtu")],
+    supervisor: "rahtu",
+    links: {
+      arxiv: "https://arxiv.org/abs/2011.04439",
+      page: "https://tutvision.github.io/FACEGAN/",
+    },
+    media: { type: "image", src: "static/media/facegan.jpg" },
+    tldr: "Face reenactment driven by Action Units instead of landmarks, so the driving face's shape no longer leaks into the result.",
+    abstract: [
+      "The face reenactment is a popular facial animation method where the person's identity is taken from the source image and the facial motion from the driving image. Recent works have demonstrated high quality results by combining the facial landmark based motion representations with the generative adversarial networks. These models perform best if the source and driving images depict the same person or if the facial structures are otherwise very similar. However, if the identity differs, the driving facial structures leak to the output distorting the reenactment result.",
+      "We propose a novel Facial Attribute Controllable rEenactment GAN (FACEGAN), which transfers the facial motion from the driving face via the Action Unit (AU) representation. Unlike facial landmarks, the AUs are independent of the facial structure preventing the identity leak. Moreover, AUs provide a human interpretable way to control the reenactment. FACEGAN processes background and face regions separately for optimized output quality. The extensive quantitative and qualitative comparisons show a clear improvement over the state-of-the-art in a single source reenactment task.",
+    ],
+    youtube: [{ id: "_XdZAEoDgnk", title: "Reenactment results" }],
+  },
+  {
+    id: "icface",
+    theme: "imaging",
+    year: 2020,
+    venue: "WACV 2020",
+    title: "ICface: Interpretable and Controllable Face Reenactment Using GANs",
+    short: "ICface",
+    authors: [P("tripathy"), P("kannala"), P("rahtu")],
+    supervisor: "rahtu",
+    featured: true,
+    links: {
+      arxiv: "https://arxiv.org/abs/1904.01909",
+      page: "https://tutvision.github.io/icface/",
+      code: "https://github.com/Blade6570/icface",
+    },
+    media: { type: "video", src: "static/media/icface.mp4", poster: "static/media/icface.jpg" },
+    tldr: "Animate any face image with human-readable controls: head pose angles and facial Action Units.",
+    abstract: [
+      "This paper presents a generic face animator that is able to control the pose and expressions of a given face image. The animation is driven by human interpretable control signals consisting of head pose angles and the Action Unit (AU) values. The control information can be obtained from multiple sources including external driving videos and manual controls. Due to the interpretable nature of the driving signal, one can easily mix the information between multiple sources (e.g. pose from one image and expression from another) and apply selective post-production editing.",
+      "The proposed face animator is implemented as a two stage neural network model that is learned in self-supervised manner using a large video collection. The proposed Interpretable and Controllable face reenactment network (ICface) is compared to the state-of-the-art neural network based face animation techniques in multiple tasks. The results indicate that ICface produces better visual quality, while being more versatile than most of the comparison methods.",
+    ],
+    youtube: [{ id: "VhWrAjI6z0M", title: "ICface in action" }],
+  },
 
-const MEMBERS = [
+  /* ================================================================= audio */
   {
-    ...PEOPLE.kamarainen,
-    role: "Professor",
-    topic: "Computer vision, robot learning & autonomous navigation",
-    pi: true,
+    id: "ease-avs",
+    theme: "audio",
+    year: 2026,
+    venue: "arXiv 2026",
+    title: "Less is More: Encoder-only Audio-Visual Segmentation",
+    short: "Encoder-only AVS",
+    authors: [P("viertola"), P("iashin"), A("Sophie Tötterström"), P("rahtu")],
+    supervisor: "rahtu",
+    links: {
+      arxiv: "https://arxiv.org/abs/2609.29121",
+      page: "https://ease-avs.notion.site",
+    },
+    tldr: "Segmenting the objects that make the sound in a video with an encoder-only model.",
+    abstractLabel: "Summary",
+    abstract: [
+      "Audio-visual segmentation finds the pixels of the objects that produce the sounds heard in a video. This work studies an encoder-only approach to the task; see the project page and paper for details.",
+    ],
   },
   {
-    ...PEOPLE.rahtu,
-    role: "Professor",
-    topic: "3D vision, neural rendering & object pose",
-    pi: true,
+    id: "saganet",
+    theme: "audio",
+    year: 2026,
+    venue: "IJCV 2026 · GCPR 2025 (oral)",
+    title: "SAGANet: Video Object Segmentation-Aware Audio Generation",
+    short: "SAGANet",
+    authors: [P("viertola"), P("iashin"), P("rahtu")],
+    supervisor: "rahtu",
+    featured: true,
+    links: {
+      paper: "https://link.springer.com/article/10.1007/s11263-026-02911-2",
+      arxiv: "https://arxiv.org/abs/2509.26604",
+      page: "https://saganet.notion.site/",
+      code: "https://github.com/ilpoviertola/SAGANet",
+    },
+    media: { type: "video", src: "static/media/saganet.mp4", poster: "static/media/saganet.jpg" },
+    tldr: "Point at an object with a segmentation mask and get its sound: Foley generation for exactly the object you choose.",
+    abstractLabel: "Summary",
+    abstract: [
+      "Existing multimodal audio generation models often lack precise user control, which limits their use in professional Foley workflows: they consider the whole video, cannot prioritise a specific object in the scene, and may generate unnecessary background sounds or focus on the wrong objects.",
+      "We introduce the task of video object segmentation-aware audio generation, which explicitly conditions sound synthesis on object-level segmentation maps, and present SAGANet, a multimodal generative model that uses visual segmentation masks together with video and text cues. A dedicated control module combines global and localized visual information, significantly improving semantic relevance and temporal alignment, especially in complex multi-source scenes. We also release the Segmented Music Solos (SMS) dataset.",
+    ],
+    gallery: [{ type: "video", src: "static/media/saganet.mp4", poster: "static/media/saganet.jpg", caption: "Input video with the target mask (violin) highlighted.", audio: true }],
   },
-  { ...PEOPLE.suomela, img: "static/img/people/suomela.jpg", topic: "Learning-based robot navigation" },
   {
-    ...PEOPLE.kuruppu,
-    img: "static/img/people/kuruppu.jpg",
-    topic: "Agile aerial robotics, odometry & navigation",
+    id: "v-aura",
+    theme: "audio",
+    year: 2025,
+    venue: "ICASSP 2025 (oral)",
+    title: "V-AURA: Temporally Aligned Audio for Video with Autoregression",
+    short: "V-AURA",
+    authors: [P("viertola"), P("iashin"), P("rahtu")],
+    supervisor: "rahtu",
+    links: {
+      arxiv: "https://arxiv.org/abs/2409.13689",
+      page: "https://v-aura.notion.site/",
+      code: "https://github.com/ilpoviertola/V-AURA",
+    },
+    tldr: "The first autoregressive video-to-audio model with tight temporal alignment, plus the VisualSound benchmark.",
+    abstractLabel: "Summary",
+    abstract: [
+      "V-AURA is the first autoregressive model to achieve high temporal alignment and relevance in video-to-audio generation. It uses a high-framerate visual feature extractor and a cross-modal audio-visual feature fusion strategy to capture fine-grained visual motion events and ensure precise temporal alignment.",
+      "We also propose VisualSound, a benchmark dataset with high audio-visual relevance built from VGGSound by removing samples whose auditory events are not aligned with the visual ones. V-AURA outperforms current state-of-the-art models in temporal alignment and semantic relevance while keeping comparable audio quality.",
+    ],
   },
-  { ...PEOPLE.torres, img: "static/img/people/torres.jpg", topic: "Multi-modal image & video restoration" },
-  { ...PEOPLE.cai, img: "static/img/people/cai.jpg", topic: "6D object pose estimation & tracking" },
-  { ...PEOPLE.ren, img: "static/img/people/ren.jpg", topic: "Novel view synthesis & 3D reconstruction" },
-  { ...PEOPLE.yang, img: "static/img/people/yang.jpg", topic: "Robot learning, imitation & offline RL" },
+  {
+    id: "synchformer",
+    theme: "audio",
+    year: 2024,
+    venue: "ICASSP 2024",
+    title: "Synchformer: Efficient Synchronization from Sparse Cues",
+    short: "Synchformer",
+    authors: [P("iashin"), A("Weidi Xie"), P("rahtu"), A("Andrew Zisserman")],
+    supervisor: "rahtu",
+    links: {
+      arxiv: "https://arxiv.org/abs/2401.16423",
+      page: "https://v-iashin.github.io/synchformer.html",
+      code: "https://github.com/v-iashin/Synchformer",
+    },
+    media: { type: "image", src: "static/media/synchformer.jpg" },
+    tldr: "Is the sound in sync with the picture? A model that tells you, even for in-the-wild YouTube videos with rare cues.",
+    abstract: [
+      "Our objective is audio-visual synchronization with a focus on 'in-the-wild' videos, such as those on YouTube, where synchronization cues can be sparse, i.e. synchronization signals occur rarely in time and in space. Our contributions include a novel audio-visual synchronization model and training that decouples feature extraction from synchronization modeling through multi-modal segment-level contrastive pre-training. This approach achieves state-of-the-art performance in both dense and sparse settings. We also extend synchronization model training to AudioSet a million-scale 'in-the-wild' dataset, investigate evidence attribution techniques for interpretability, and explore a new capability for synchronization models: audio-visual synchronizability.",
+    ],
+  },
+  {
+    id: "sparsesync",
+    theme: "audio",
+    year: 2022,
+    venue: "BMVC 2022 (spotlight)",
+    title: "Sparse in Space and Time: Audio-visual Synchronisation with Trainable Selectors",
+    short: "SparseSync",
+    authors: [P("iashin"), A("Weidi Xie"), P("rahtu"), A("Andrew Zisserman")],
+    supervisor: "rahtu",
+    links: {
+      arxiv: "https://arxiv.org/abs/2210.07055",
+      page: "https://v-iashin.github.io/SparseSync.html",
+      code: "https://github.com/v-iashin/SparseSync",
+    },
+    media: { type: "image", src: "static/media/sparsesync.jpg" },
+    tldr: "Synchronising open-domain videos where the cue is small and brief, like a lion that roars once.",
+    abstractLabel: "Overview",
+    abstract: [
+      "Audio-visual synchronisation requires a model to relate changes in the visual and audio streams. Prior work focused primarily on talking-head videos; open-domain videos often have only a small visual indication (sparse in space), and cues may be intermittent (sparse in time), e.g. a lion roars only once in a clip.",
+      "We propose SparseSelector, a transformer-based architecture that processes long videos with linear complexity in clip duration by 'compressing' the audio and visual tokens into two small sets of learnable selectors, which a transformer uses to predict the temporal offset. We also curate VGGSound-Sparse, 6.5k videos in 12 'sparse' classes such as dog barking, chopping wood and skateboarding, as a public benchmark.",
+    ],
+    youtube: [{ id: "q-232MJo0_E", title: "Presentation" }],
+  },
+  {
+    id: "specvqgan",
+    theme: "audio",
+    year: 2021,
+    venue: "BMVC 2021 (oral)",
+    title: "Taming Visually Guided Sound Generation",
+    short: "SpecVQGAN",
+    authors: [P("iashin"), P("rahtu")],
+    supervisor: "rahtu",
+    links: {
+      arxiv: "https://arxiv.org/abs/2110.08791",
+      page: "https://v-iashin.github.io/SpecVQGAN.html",
+      code: "https://github.com/v-iashin/SpecVQGAN",
+    },
+    media: { type: "image", src: "static/media/specvqgan.svg" },
+    tldr: "Long, high-quality sounds for a video, generated from a learned codebook of spectrogram tokens.",
+    abstractLabel: "Overview",
+    abstract: [
+      "Generating visually relevant, high-quality sounds would let sound designers spend less time searching large Foley databases. Generating long (10+ second) high-quality audio for a wide variety of visual scenes remained a challenge.",
+      "We shrink a training dataset of audio spectrograms into a codebook of representative vectors. Like word tokens in language modelling, a transformer samples codebook tokens conditioned on video-frame tokens; the sampled sequence is decoded into a spectrogram by the pre-trained codebook decoder and then into a waveform.",
+    ],
+    youtube: [{ id: "Bucb3nAa398", title: "Presentation" }],
+  },
+  {
+    id: "bmt",
+    theme: "audio",
+    year: 2020,
+    venue: "BMVC 2020",
+    title: "A Better Use of Audio-Visual Cues: Dense Video Captioning with Bi-modal Transformer",
+    short: "BMT",
+    authors: [P("iashin"), P("rahtu")],
+    supervisor: "rahtu",
+    links: {
+      arxiv: "https://arxiv.org/abs/2005.08271",
+      page: "https://v-iashin.github.io/bmt.html",
+      code: "https://github.com/v-iashin/BMT",
+    },
+    media: { type: "image", src: "static/media/bmt.svg" },
+    tldr: "Find the events in an untrimmed video and describe each one, using both what is seen and what is heard.",
+    abstractLabel: "Overview",
+    abstract: [
+      "Dense video captioning aims to localize and describe important events in untrimmed videos. Existing methods mainly exploit visual information alone and neglect the audio track. We present the Bi-modal Transformer with Proposal Generator (BMT), which uses audio and visual input sequences to select events in a video and then uses these clips to generate a textual description.",
+      "Audio (VGGish) and visual (I3D) features pass through bi-modal encoder layers that produce audio-attended visual and visual-attended audio features. A bi-modal multi-headed proposal generator, partly inspired by YOLO, proposes event segments; the trimmed features are re-encoded and a bi-modal decoder generates the caption word by word.",
+    ],
+    youtube: [{ id: "C4zYVIqGDVQ", title: "Presentation" }],
+  },
+  {
+    id: "mdvc",
+    theme: "audio",
+    year: 2020,
+    venue: "CVPR 2020 Workshops",
+    title: "Multi-modal Dense Video Captioning",
+    short: "MDVC",
+    authors: [P("iashin"), P("rahtu")],
+    supervisor: "rahtu",
+    links: {
+      paper: "http://openaccess.thecvf.com/content_CVPRW_2020/html/w56/Iashin_Multi-Modal_Dense_Video_Captioning_CVPRW_2020_paper.html",
+      page: "https://v-iashin.github.io/mdvc.html",
+      code: "https://github.com/v-iashin/mdvc",
+    },
+    media: { type: "video", src: "static/media/mdvc.mp4", poster: "static/media/mdvc.jpg" },
+    tldr: "Video, audio and speech together describe what happens in a video better than frames alone.",
+    abstract: [
+      "Dense video captioning is a task of localizing interesting events from an untrimmed video and producing textual description (captions) for each localized event. Most of the previous works in dense video captioning are solely based on visual information and completely ignore the audio track. However, audio, and speech, in particular, are vital cues for a human observer in understanding an environment. In this paper, we present a new dense video captioning approach that is able to utilize any number of modalities for event description. Specifically, we show how audio and speech modalities may improve a dense video captioning model.",
+      "We apply automatic speech recognition (ASR) system to obtain a temporally aligned textual description of the speech (similar to subtitles) and treat it as a separate input alongside video frames and the corresponding audio track. We formulate the captioning task as a machine translation problem and utilize recently proposed Transformer architecture to convert multi-modal input data into textual descriptions. We demonstrate the performance of our model on ActivityNet Captions dataset. The ablation studies indicate a considerable contribution from audio and speech components suggesting that these modalities contain substantial complementary information to video frames.",
+    ],
+    youtube: [{ id: "0Vmx_gzP1bM", title: "Presentation" }],
+  },
+  {
+    id: "v-slowfast",
+    theme: "audio",
+    year: 2022,
+    venue: "WACV 2022",
+    title: "V-SlowFast Network for Efficient Visual Sound Separation",
+    short: "V-SlowFast",
+    authors: [P("zhu"), P("rahtu")],
+    supervisor: "rahtu",
+    links: {
+      paper: "https://openaccess.thecvf.com/content/WACV2022/papers/Zhu_V-SlowFast_Network_for_Efficient_Visual_Sound_Separation_WACV_2022_paper.pdf",
+      page: "https://ly-zhu.github.io/V-SlowFast",
+    },
+    media: { type: "image", src: "static/media/vslowfast.jpg" },
+    tldr: "Separate the sound of the instrument you see using slow and fast spectrograms, with 74% fewer parameters.",
+    abstract: [
+      "The objective of this paper is to perform visual sound separation: i) we study visual sound separation on spectrograms of different temporal resolutions; ii) we propose a new light yet efficient three-stream framework V-SlowFast that operates on Visual frame, Slow spectrogram, and Fast spectrogram. The Slow spectrogram captures the coarse temporal resolution while the Fast spectrogram contains the fine-grained temporal resolution; iii) we introduce two contrastive objectives to encourage the network to learn discriminative visual features for separating sounds; iv) we propose an audio-visual global attention module for audio and visual feature fusion; v) the introduced V-SlowFast model outperforms previous state-of-the-art in single-frame based visual sound separation on small- and large-scale datasets: MUSIC-21, AVE, and VGG-Sound. We also propose a small V-SlowFast architecture variant, which achieves 74.2% reduction in the number of model parameters and 81.4% reduction in GMACs compared to the previous multi-stage models.",
+    ],
+  },
+  {
+    id: "amnet",
+    theme: "audio",
+    year: 2022,
+    venue: "WACV 2022",
+    title: "Visually Guided Sound Source Separation and Localization using Self-Supervised Motion Representations",
+    short: "AMnet",
+    authors: [P("zhu"), P("rahtu")],
+    supervisor: "rahtu",
+    links: {
+      paper: "https://openaccess.thecvf.com/content/WACV2022/papers/Zhu_Visually_Guided_Sound_Source_Separation_and_Localization_Using_Self-Supervised_Motion_WACV_2022_paper.pdf",
+      page: "https://ly-zhu.github.io/self-supervised-motion-representations",
+      code: "https://github.com/ly-zhu/self-supervised-motion-representations",
+    },
+    media: { type: "image", src: "static/media/amnet_loc.jpg" },
+    tldr: "Separate and localize sounding objects from appearance and self-supervised motion, without keypoint or optical-flow models.",
+    abstract: [
+      "The objective of this paper is to perform audio-visual sound source separation, i.e. to separate component audios from a mixture based on the videos of sound sources. Moreover, we aim to pinpoint the source location in the input video sequence. Recent works have shown impressive audio-visual separation results when using prior knowledge of the source type (e.g. human playing instrument) and pre-trained motion detectors (e.g. keypoints or optical flows). However, at the same time, the models are limited to a certain application domain.",
+      "In this paper, we address these limitations and make the following contributions: i) we propose a two-stage architecture, called Appearance and Motion network (AMnet), where the stages specialise to appearance and motion cues, respectively. The entire system is trained in a self-supervised manner; ii) we introduce an Audio-Motion Embedding (AME) framework to explicitly represent the motions that related to sound; iii) we propose an audio-motion transformer architecture for audio and motion feature fusion; iv) we demonstrate state-of-the-art performance on two challenging datasets (MUSIC-21 and AVE) despite the fact that we do not use any pre-trained keypoint detectors or optical flow estimators.",
+    ],
+    gallery: [{ type: "video", src: "static/media/amnet.mp4", poster: "static/media/amnet.jpg", caption: "Supplementary video (with sound).", audio: true }],
+  },
+  {
+    id: "category-sound-separation",
+    theme: "audio",
+    year: 2021,
+    venue: "EUVIP 2021 · Best Paper",
+    title: "Leveraging Category Information for Single-Frame Visual Sound Source Separation",
+    short: "Single-Frame Separation",
+    authors: [P("zhu"), P("rahtu")],
+    supervisor: "rahtu",
+    links: {
+      paper: "https://ieeexplore.ieee.org/abstract/document/9484036",
+      page: "https://ly-zhu.github.io/leveraging-category-information-for-single-frame-visual-sound-source-separation",
+      code: "https://github.com/ly-zhu/Leveraging-Category-Information-for-Single-Frame-Visual-Sound-Source-Separation",
+    },
+    media: { type: "image", src: "static/media/euvip.jpg" },
+    tldr: "Simple single-frame models that use sound-source categories to separate and localize sounds.",
+    abstract: [
+      "Visual sound source separation aims at identifying sound components from a given sound mixture with the presence of visual cues. Prior works have demonstrated impressive results, but with the expense of large multi-stage architectures and complex data representations (e.g. optical flow trajectories). In contrast, we study simple yet efficient models for visual sound separation using only a single video frame. Furthermore, our models are able to exploit the information of the sound source category in the separation process. To this end, we propose two models where we assume that i) the category labels are available at the training time, or ii) we know if the training sample pairs are from the same or different category. The experiments with the MUSIC dataset show that our model obtains comparable or better performance compared to several recent baseline methods.",
+    ],
+  },
+  {
+    id: "cof-net",
+    theme: "audio",
+    year: 2020,
+    venue: "ACCV 2020 (oral)",
+    title: "Visually Guided Sound Source Separation using Cascaded Opponent Filter Network",
+    short: "COF-Net",
+    authors: [P("zhu"), P("rahtu")],
+    supervisor: "rahtu",
+    links: {
+      paper: "https://openaccess.thecvf.com/content/ACCV2020/papers/Zhu_Visually_Guided_Sound_Source_Separation_using_Cascaded_Opponent_Filter_Network_ACCV_2020_paper.pdf",
+      page: "https://ly-zhu.github.io/cof-net",
+      code: "https://github.com/ly-zhu/cof-net",
+    },
+    media: { type: "image", src: "static/media/cofnet.jpg" },
+    tldr: "A cascade of opponent filters that keeps refining which sound belongs to which visible source, down to pixel-level localization.",
+    abstract: [
+      "The objective of this paper is to recover the original component signals from a mixture audio with the aid of visual cues of the sound sources. Such task is usually referred as visually guided sound source separation. The proposed Cascaded Opponent Filter (COF) framework consists of multiple stages, which recursively refine the source separation. A key element in COF is a novel opponent filter module that identifies and relocates residual components between sources. The system is guided by the appearance and motion of the source, and, for this purpose, we study different representations based on video frames, optical flows, dynamic images, and their combinations.",
+      "Finally, we propose a Sound Source Location Masking (SSLM) technique, which, together with COF, produces a pixel level mask of the source location. The entire system is trained in an end-to-end manner using a large set of unlabelled videos. We compare COF with recent baselines and obtain the state-of-the-art performance in three challenging datasets (MUSIC, A-MUSIC, and A-NATURAL).",
+    ],
+  },
 ];

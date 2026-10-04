@@ -3,49 +3,46 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Computer Vision Group · Tampere University</title>
-  <meta name="description" content="Recent research highlights from the Computer Vision Group at Tampere University: robot navigation, aerial robotics, 3D reconstruction, 6D pose estimation and video restoration.">
-  <meta property="og:title" content="Computer Vision Group · Tampere University">
-  <meta property="og:description" content="Recent research highlights: robot navigation, aerial robotics, 3D reconstruction and video restoration.">
-  <meta property="og:image" content="static/media/navscaling_wuhan.jpg">
+  <title>TUNI Vision · Computer Vision Group, Tampere University</title>
+  <meta name="description" content="Recent research from the Computer Vision Group (TUNI Vision) at Tampere University: robot navigation, 3D reconstruction, aerial robotics, robot learning, image restoration and audio-visual learning.">
+  <meta property="og:title" content="TUNI Vision · Tampere University">
+  <meta property="og:description" content="Recent research from the Computer Vision Group at Tampere University.">
+  <meta property="og:image" content="static/img/logo.png">
 
   <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro" rel="stylesheet">
   <link rel="stylesheet" href="static/vendor/bulma/bulma.min.css">
   <link rel="stylesheet" href="static/vendor/fontawesome/css/all.min.css">
   <link rel="stylesheet" href="static/vendor/academicons/css/academicons.min.css">
   <link rel="stylesheet" href="static/css/style.css">
-  <link rel="icon" href="static/img/favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="static/img/favicon-64.png" type="image/png">
+  <link rel="apple-touch-icon" href="static/img/apple-touch-icon.png">
 </head>
 <body>
 
 <nav class="navbar is-fixed-top" role="navigation" aria-label="main navigation">
   <div class="navbar-brand">
     <a class="navbar-item brand" href="#top">
-      <span class="brand-mark">TUT<span>vision</span></span>
+      <img src="static/img/logo.png" alt="" class="brand-logo">
+      <span class="brand-name">TUNI Vision</span>
     </a>
     <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false" data-target="main-nav">
       <span aria-hidden="true"></span><span aria-hidden="true"></span><span aria-hidden="true"></span>
     </a>
   </div>
   <div id="main-nav" class="navbar-menu">
-    <div class="navbar-start">
-      <a class="navbar-item" href="#overview">Overview</a>
-      <a class="navbar-item" href="#theme-navigation">Navigation</a>
-      <a class="navbar-item" href="#theme-aerial">Aerial</a>
-      <a class="navbar-item" href="#theme-3d">3D Vision</a>
-      <a class="navbar-item" href="#theme-imaging">Restoration</a>
-      <a class="navbar-item" href="#team">Team</a>
+    <div class="navbar-start" id="nav-themes">
+      <a class="navbar-item" href="#highlights">Highlights</a>
     </div>
     <div class="navbar-end">
       <div class="navbar-item">
-        <a class="button is-rounded is-light" href="#" data-present>
-          <span class="icon"><i class="fas fa-tv"></i></span><span>Presentation mode</span>
-        </a>
-      </div>
-      <div class="navbar-item">
-        <a class="button is-rounded is-dark" href="https://research.tuni.fi/vision/" target="_blank" rel="noopener">
-          <span class="icon"><i class="fas fa-arrow-up-right-from-square"></i></span><span>Lab website</span>
-        </a>
+        <div class="buttons">
+          <a class="button is-rounded is-light" href="#" data-present>
+            <span class="icon"><i class="fas fa-tv"></i></span><span>Presentation</span></a>
+          <a class="button is-rounded is-light" href="https://github.com/TUTvision" target="_blank" rel="noopener">
+            <span class="icon"><i class="fab fa-github"></i></span><span>GitHub</span></a>
+          <a class="button is-rounded is-dark" href="https://research.tuni.fi/vision/" target="_blank" rel="noopener">
+            <span class="icon"><i class="fas fa-arrow-up-right-from-square"></i></span><span>Lab website</span></a>
+        </div>
       </div>
     </div>
   </div>
@@ -54,23 +51,16 @@
 <section class="hero" id="top">
   <div class="hero-body">
     <div class="container is-max-desktop has-text-centered">
-      <p class="hero-kicker">Tampere University · Finland</p>
-      <h1 class="title is-1 publication-title">Computer Vision Group</h1>
-      <p class="hero-sub">
-        Robots that navigate the real world, drones that fly where GPS fails,
-        and 3D vision from the phone in your pocket.
-        Here are <span id="project-count"></span> of our recent projects.
-      </p>
-      <p class="hero-pis">
-        Led by
-        <a href="https://webpages.tuni.fi/vision/public_pages/JoniKamarainen/index.html" target="_blank" rel="noopener">Prof. Joni-Kristian Kämäräinen</a>
-        and <a href="https://esa.rahtu.fi/" target="_blank" rel="noopener">Prof. Esa Rahtu</a>
-      </p>
+      <img src="static/img/logo.png" alt="TUNI Vision logo" class="hero-logo">
+      <h1 class="title is-1 publication-title">TUNI Vision</h1>
+      <p class="hero-sub">Recent research from the Computer Vision Group at Tampere University</p>
       <div class="publication-links">
-        <a class="button is-rounded is-dark link-button" href="#overview">
-          <span class="icon"><i class="fas fa-play"></i></span><span>Explore projects</span></a>
+        <a class="button is-rounded is-dark link-button" href="#highlights">
+          <span class="icon"><i class="fas fa-play"></i></span><span>Explore</span></a>
         <a class="button is-rounded is-dark link-button" href="#" data-present>
           <span class="icon"><i class="fas fa-tv"></i></span><span>Presentation mode</span></a>
+        <a class="button is-rounded is-dark link-button" href="https://github.com/TUTvision" target="_blank" rel="noopener">
+          <span class="icon"><i class="fab fa-github"></i></span><span>Code on GitHub</span></a>
         <a class="button is-rounded is-dark link-button" href="https://research.tuni.fi/vision/" target="_blank" rel="noopener">
           <span class="icon"><i class="fas fa-globe"></i></span><span>Lab website</span></a>
       </div>
@@ -78,56 +68,77 @@
   </div>
 </section>
 
-<section class="section overview" id="overview">
+<section class="section highlights" id="highlights">
   <div class="container">
-    <h2 class="title is-3 has-text-centered">At a glance</h2>
-    <div class="buttons is-centered" id="theme-filter"></div>
+    <h2 class="title is-3 has-text-centered">Highlights</h2>
     <div class="wall" id="wall"></div>
   </div>
 </section>
 
-<main id="projects"></main>
-
-<section class="section team" id="team">
-  <div class="container is-max-desktop">
-    <h2 class="title is-2 has-text-centered">Team</h2>
-    <p class="subtitle is-5 has-text-centered">The people behind the projects on this page.</p>
-    <div class="columns is-multiline is-centered is-mobile" id="people"></div>
-    <div class="has-text-centered">
-      <a class="button is-rounded is-dark is-medium" href="https://research.tuni.fi/vision/" target="_blank" rel="noopener">
-        <span class="icon"><i class="fas fa-arrow-up-right-from-square"></i></span>
-        <span>Visit the Computer Vision Group website</span>
-      </a>
-    </div>
+<section class="section browse" id="projects-top">
+  <div class="container">
+    <h2 class="title is-3 has-text-centered">All projects</h2>
+    <div class="buttons is-centered" id="theme-filter"></div>
+    <div id="projects"></div>
   </div>
 </section>
 
 <footer class="footer">
-  <div class="container">
-    <div class="content has-text-centered">
-      <p>
-        <a href="https://research.tuni.fi/vision/" target="_blank" rel="noopener">Computer Vision Group</a>,
-        Tampere University. Media and text courtesy of the project authors; see each project page for details.
-      </p>
-      <p class="is-size-7">
-        Page style adapted from the <a href="https://github.com/nerfies/nerfies.github.io" target="_blank" rel="noopener">Nerfies</a>
-        project page template (<a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener">CC BY-SA 4.0</a>).
-      </p>
-    </div>
+  <div class="container has-text-centered">
+    <img src="static/img/logo.png" alt="" class="footer-logo">
+    <p class="footer-links">
+      <a href="https://research.tuni.fi/vision/" target="_blank" rel="noopener"><i class="fas fa-globe"></i> Lab website</a>
+      <a href="https://github.com/TUTvision" target="_blank" rel="noopener"><i class="fab fa-github"></i> github.com/TUTvision</a>
+    </p>
+    <p class="is-size-7">
+      Computer Vision Group, Tampere University. Media and text courtesy of the project authors; see each project page for details.
+      Page style adapted from the <a href="https://github.com/nerfies/nerfies.github.io" target="_blank" rel="noopener">Nerfies</a> template
+      (<a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener">CC BY-SA 4.0</a>).
+    </p>
   </div>
 </footer>
 
-<div class="present-overlay" id="present-overlay" hidden>
-  <div class="present-bar"><div id="present-progress"></div></div>
-  <div class="present-controls">
-    <span id="present-label"></span>
-    <button id="present-prev" aria-label="Previous project"><i class="fas fa-backward-step"></i></button>
-    <button id="present-pause" aria-label="Pause or resume"><i class="fas fa-pause"></i></button>
-    <button id="present-next" aria-label="Next project"><i class="fas fa-forward-step"></i></button>
-    <button id="present-exit" aria-label="Exit presentation mode"><i class="fas fa-xmark"></i></button>
+<!-- Project details (opened from a card, or directly with index.html#<project-id>) -->
+<div class="modal" id="details" aria-hidden="true">
+  <div class="modal-background" data-close></div>
+  <div class="details-panel" role="dialog" aria-modal="true" aria-labelledby="details-title">
+    <div class="details-bar">
+      <button class="details-nav" id="details-prev" aria-label="Previous project"><i class="fas fa-chevron-left"></i></button>
+      <span class="details-count" id="details-count"></span>
+      <button class="details-nav" id="details-next" aria-label="Next project"><i class="fas fa-chevron-right"></i></button>
+      <button class="details-close" data-close aria-label="Close"><i class="fas fa-xmark"></i></button>
+    </div>
+    <div class="details-body" id="details-body"></div>
   </div>
 </div>
 
+<!-- Presentation mode: full-screen slideshow of the highlighted projects -->
+<div class="show" id="show" hidden>
+  <div class="show-stage">
+    <div class="show-media" id="show-media"></div>
+    <aside class="show-info">
+      <div class="show-brand"><img src="static/img/logo.png" alt=""><span>TUNI Vision</span></div>
+      <div class="show-tags" id="show-tags"></div>
+      <h2 class="show-title" id="show-title"></h2>
+      <p class="show-authors" id="show-authors"></p>
+      <p class="show-tldr" id="show-tldr"></p>
+      <div class="show-qr">
+        <div id="show-qr"></div>
+        <span>Scan for the paper,<br>code and videos</span>
+      </div>
+    </aside>
+  </div>
+  <div class="show-bar"><div id="show-progress"></div></div>
+  <div class="show-controls">
+    <span id="show-label"></span>
+    <button id="show-prev" aria-label="Previous"><i class="fas fa-backward-step"></i></button>
+    <button id="show-pause" aria-label="Pause or resume"><i class="fas fa-pause"></i></button>
+    <button id="show-next" aria-label="Next"><i class="fas fa-forward-step"></i></button>
+    <button id="show-exit" aria-label="Exit presentation mode"><i class="fas fa-xmark"></i></button>
+  </div>
+</div>
+
+<script src="static/vendor/qrcode/qrcode.js"></script>
 <script src="static/js/media-dims.js"></script>
 <script src="static/js/projects.js"></script>
 <script src="static/js/main.js"></script>
